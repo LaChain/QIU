@@ -1,5 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
-require("dotenv").config();
+require("dotenv-defaults").config();
 require("./tasks/register-entity");
 
 const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
