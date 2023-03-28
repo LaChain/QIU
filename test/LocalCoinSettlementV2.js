@@ -83,6 +83,46 @@ describe("Test LocalCoinSettlementV2", function () {
     };
   }
 
+  async function newTransferRequest(
+    tERC20,
+    lcs,
+    entityOrigin,
+    destinationAddress,
+    tokenAmount,
+    encrtyptedCvuOrigin,
+    encrtyptedCvuDestination,
+    expirationTime
+  ) {
+    // approve tokens
+    await tERC20.connect(entityOrigin).approve(lcs.address, tokenAmount);
+    const entityInfo = await lcs.entities(entityOrigin.address);
+
+    const transferHash = ethers.utils.solidityKeccak256(
+      ["address", "address", "uint256", "bytes", "bytes", "uint224", "uint256"],
+      [
+        entityOrigin.address,
+        destinationAddress,
+        tokenAmount,
+        encrtyptedCvuOrigin,
+        encrtyptedCvuDestination,
+        entityInfo.nonce,
+        expirationTime,
+      ]
+    );
+
+    await lcs
+      .connect(entityOrigin)
+      .transferRequest(
+        destinationAddress,
+        tokenAmount,
+        encrtyptedCvuOrigin,
+        encrtyptedCvuDestination,
+        expirationTime
+      );
+
+    return transferHash;
+  }
+
   async function deployFixtureAndTransferRequest() {
     const { owner, ent1, ent2, ent3, entity1, entity2, entity3, tERC20, lcs } =
       await deployFixture();
@@ -209,24 +249,25 @@ describe("Test LocalCoinSettlementV2", function () {
       ).to.be.revertedWith("ERC20: insufficient allowance");
     });
     it("should transfer tokens from ent1 to contract and emit transferRequest event", async function () {
-      const { ent1, lcs, tERC20, tokenAmount } = await loadFixture(
-        deployFixtureAndTransferRequest
-      );
+      const { ent1, lcs, tERC20, tokenAmount, transferHash } =
+        await loadFixture(deployFixtureAndTransferRequest);
 
       const entity1InfoAfter = await lcs.entities(ent1.address);
       assert.equal(entity1InfoAfter.nonce, 1);
       assert.equal(await tERC20.balanceOf(lcs.address), tokenAmount);
+      const transferInfo = await lcs.transfers(transferHash);
+      assert.equal(transferInfo.status, 0);
     });
   });
 
-  describe("Test withdraw function", function () {
+  describe("Test batchAcceptTransfer function", function () {
     it("should fail if destination for transfer is not the same as msg.sender", async function () {
       const { entity1, transferHash, lcs } = await loadFixture(
         deployFixtureAndTransferRequest
       );
 
       await expect(
-        lcs.connect(entity1).withdraw(transferHash)
+        lcs.connect(entity1).batchAcceptTransfer([transferHash])
       ).to.be.revertedWith("not authorized");
     });
     it("should fail if transfer request is expired", async function () {
@@ -237,76 +278,135 @@ describe("Test LocalCoinSettlementV2", function () {
       await time.increaseTo(expiryTime);
 
       await expect(
-        lcs.connect(entity2).withdraw(transferHash)
+        lcs.connect(entity2).batchAcceptTransfer([transferHash])
       ).to.be.revertedWith("transfer expired");
     });
-    it("should fail if transfer already completed is expired", async function () {
+    it("should fail if transfer status is not pending", async function () {
       const { entity2, transferHash, lcs } = await loadFixture(
         deployFixtureAndTransferRequest
       );
 
-      await lcs.connect(entity2).withdraw(transferHash);
+      await lcs.connect(entity2).batchAcceptTransfer([transferHash]);
 
       await expect(
-        lcs.connect(entity2).withdraw(transferHash)
-      ).to.be.revertedWith("transfer already completed");
+        lcs.connect(entity2).batchAcceptTransfer([transferHash])
+      ).to.be.revertedWith("transfer already completed or cancelled");
     });
-    it("should withdraw transfer sucessfully and emit withdraw event", async function () {
+    it("should batchAcceptTransfer sucessfully and emit event", async function () {
       const { entity2, ent2, transferHash, lcs, tERC20, tokenAmount } =
         await loadFixture(deployFixtureAndTransferRequest);
 
       const balanceBefore = await tERC20.balanceOf(ent2.address);
 
-      await expect(lcs.connect(entity2).withdraw(transferHash))
-        .to.emit(lcs, "Withdraw")
-        .withArgs(transferHash, ent2.address, true);
+      await expect(lcs.connect(entity2).batchAcceptTransfer([transferHash]))
+        .to.emit(lcs, "TransferAccepted")
+        .withArgs(transferHash, ent2.address);
 
       const balanceAfter = await tERC20.balanceOf(ent2.address);
       expect(bn(balanceBefore).add(tokenAmount), balanceAfter).to.be.equal;
+      const transferInfo = await lcs.transfers(transferHash);
+      assert.equal(transferInfo.status, 1);
+    });
+    it("should batchAcceptTransfer sucessfully many transfers", async function () {
+      const { entity1, entity2, ent2, transferHash, lcs, tERC20, tokenAmount } =
+        await loadFixture(deployFixtureAndTransferRequest);
+
+      const balanceBefore = await tERC20.balanceOf(ent2.address);
+
+      const transferHash2 = await newTransferRequest(
+        tERC20,
+        lcs,
+        entity1,
+        ent2.address,
+        tokenAmount,
+        "0x",
+        "0x",
+        ONE_WEEK_IN_SECS
+      );
+      await await lcs
+        .connect(entity2)
+        .batchAcceptTransfer([transferHash, transferHash2]);
+
+      const balanceAfter = await tERC20.balanceOf(ent2.address);
+      expect(bn(balanceBefore).add(tokenAmount * 2), balanceAfter).to.be.equal;
+      const transferInfo1 = await lcs.transfers(transferHash);
+      assert.equal(transferInfo1.status, 1);
+      const transferInfo2 = await lcs.transfers(transferHash2);
+      assert.equal(transferInfo2.status, 1);
     });
   });
 
-  describe("Test refund function", function () {
+  describe("Test batchCancelTransfer function", function () {
     it("should fail if sender is not the same as origin for transfer", async function () {
       const { entity2, transferHash, lcs } = await loadFixture(
         deployFixtureAndTransferRequest
       );
 
       await expect(
-        lcs.connect(entity2).refund(transferHash)
+        lcs.connect(entity2).batchCancelTransfer([transferHash])
       ).to.be.revertedWith("not authorized");
     });
-    it("should fail if origin tries to get a refund before it expires", async function () {
+    it("should fail if origin tries to batchCancelTransfer before it expires", async function () {
       const { entity1, transferHash, lcs } = await loadFixture(
         deployFixtureAndTransferRequest
       );
 
       await expect(
-        lcs.connect(entity1).refund(transferHash)
+        lcs.connect(entity1).batchCancelTransfer([transferHash])
       ).to.be.revertedWith("transfer not expired");
     });
-    it("should fail if transfer already completed", async function () {
+    it("should fail if transfer is not status pending", async function () {
       const { entity1, entity2, transferHash, lcs, expiryTime } =
         await loadFixture(deployFixtureAndTransferRequest);
 
-      await lcs.connect(entity2).withdraw(transferHash);
+      await lcs.connect(entity2).batchAcceptTransfer([transferHash]);
       await time.increaseTo(expiryTime);
 
       await expect(
-        lcs.connect(entity1).refund(transferHash)
-      ).to.be.revertedWith("transfer already completed");
+        lcs.connect(entity1).batchCancelTransfer([transferHash])
+      ).to.be.revertedWith("transfer already completed or cancelled");
     });
-    it("origin should be able to have a refund after it expires", async function () {
+    it("origin should be able to batchCancelTransfer after it expires", async function () {
       const { entity1, ent1, transferHash, lcs, expiryTime, tERC20 } =
         await loadFixture(deployFixtureAndTransferRequest);
 
       await time.increaseTo(expiryTime);
 
-      await expect(lcs.connect(entity1).refund(transferHash))
-        .to.emit(lcs, "Refund")
+      await expect(lcs.connect(entity1).batchCancelTransfer([transferHash]))
+        .to.emit(lcs, "TransferCancelled")
         .withArgs(transferHash, ent1.address);
 
       assert.equal(await tERC20.balanceOf(lcs.address), 0);
+      const transferInfo = await lcs.transfers(transferHash);
+      assert.equal(transferInfo.status, 2);
+    });
+    it("should batch cancel many transfers after it expires", async function () {
+      const { entity1, transferHash, lcs, expiryTime, tERC20, tokenAmount } =
+        await loadFixture(deployFixtureAndTransferRequest);
+
+      const transferHash2 = await newTransferRequest(
+        tERC20,
+        lcs,
+        entity1,
+        ent2.address,
+        tokenAmount,
+        "0x",
+        "0x",
+        ONE_WEEK_IN_SECS
+      );
+
+      const transferInfo2before = await lcs.transfers(transferHash2);
+      await time.increaseTo(bn(transferInfo2before.expiration).add(1));
+
+      await lcs
+        .connect(entity1)
+        .batchCancelTransfer([transferHash, transferHash2]);
+
+      assert.equal(await tERC20.balanceOf(lcs.address), 0);
+      const transferInfo1 = await lcs.transfers(transferHash);
+      const transferInfo2 = await lcs.transfers(transferHash);
+      assert.equal(transferInfo1.status, 2);
+      assert.equal(transferInfo2.status, 2);
     });
   });
 });

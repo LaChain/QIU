@@ -12,6 +12,12 @@ contract LocalCoinSettlementV2 is Ownable {
         bytes publicKey;
     }
 
+    enum Status {
+        Pending,
+        Completed,
+        Cancelled
+    }
+
     mapping(address => Entity) public entities;
 
     // ERC20 token address
@@ -25,7 +31,7 @@ contract LocalCoinSettlementV2 is Ownable {
         bytes encryptedCvuDestination;
         uint256 nonce;
         uint256 expiration;
-        bool completed;
+        Status status;
     }
 
     mapping(bytes32 => Transfer) public transfers;
@@ -47,13 +53,15 @@ contract LocalCoinSettlementV2 is Ownable {
         uint256 expiration
     );
 
-    event Withdraw(
+    event TransferAccepted(
         bytes32 indexed transferHash,
-        address indexed recipient,
-        bool success
+        address indexed recipient
     );
 
-    event Refund(bytes32 indexed transferHash, address indexed sender);
+    event TransferCancelled(
+        bytes32 indexed transferHash,
+        address indexed sender
+    );
 
     constructor(address _tokenAddress) Ownable() {
         tokenAddress = _tokenAddress;
@@ -107,7 +115,7 @@ contract LocalCoinSettlementV2 is Ownable {
             )
         );
         Transfer storage transfer = transfers[transferHash];
-        require(!transfer.completed, "transfer already completed");
+        require(transfer.origin == address(0), "transfer already created");
 
         transfer.origin = msg.sender;
         transfer.destination = _destination;
@@ -116,7 +124,7 @@ contract LocalCoinSettlementV2 is Ownable {
         transfer.encryptedCvuDestination = _encryptedCvuDestination;
         transfer.nonce = originInfo.nonce;
         transfer.expiration = block.timestamp + _expiration;
-        transfer.completed = false;
+        transfer.status = Status.Pending;
 
         originInfo.nonce += 1;
 
@@ -142,8 +150,22 @@ contract LocalCoinSettlementV2 is Ownable {
         return transferHash;
     }
 
-    // Destination address can withdraw the tokens from the transfer request
-    function withdraw(bytes32 _transferHash) external {
+    // Accept multiple transfer requests at once (destination)
+    function batchAcceptTransfer(bytes32[] calldata _transferHashes) external {
+        for (uint256 i = 0; i < _transferHashes.length; i++) {
+            acceptTransfer(_transferHashes[i]);
+        }
+    }
+
+    // Cancel multiple transfer requests at once (destination)
+    function batchCancelTransfer(bytes32[] calldata _transferHashes) external {
+        for (uint256 i = 0; i < _transferHashes.length; i++) {
+            cancelTransfer(_transferHashes[i]);
+        }
+    }
+
+    // Destination address can acceptTransfer from a transfer request
+    function acceptTransfer(bytes32 _transferHash) private {
         Transfer storage transfer = transfers[_transferHash];
 
         // Check that destination for transfer is the same as msg.sender
@@ -152,11 +174,14 @@ contract LocalCoinSettlementV2 is Ownable {
         // Check that transfer has not expired
         require(block.timestamp < transfer.expiration, "transfer expired");
 
-        // Check that transfer has not been completed already
-        require(!transfer.completed, "transfer already completed");
+        // Check that transfer has not been completed or cancelled already
+        require(
+            transfer.status == Status.Pending,
+            "transfer already completed or cancelled"
+        );
 
-        // Mark transfer as completed
-        transfer.completed = true;
+        // Mark transfer status as completed
+        transfer.status = Status.Completed;
 
         // Transfer the tokens to the destination using SafeERC20
         SafeERC20.safeTransfer(
@@ -165,11 +190,11 @@ contract LocalCoinSettlementV2 is Ownable {
             transfer.amount
         );
 
-        emit Withdraw(_transferHash, transfer.destination, true);
+        emit TransferAccepted(_transferHash, transfer.destination);
     }
 
-    // Refund the tokens from the transfer (sender)
-    function refund(bytes32 _transferHash) external {
+    // Cancel a transfer request and get back tokens (sender)
+    function cancelTransfer(bytes32 _transferHash) private {
         Transfer storage transfer = transfers[_transferHash];
 
         // Check sender is the same as origin for transfer
@@ -178,11 +203,14 @@ contract LocalCoinSettlementV2 is Ownable {
         // Check that transfer has expired
         require(block.timestamp >= transfer.expiration, "transfer not expired");
 
-        // Check that transfer has not been completed already
-        require(!transfer.completed, "transfer already completed");
+        // Check that transfer has not been completed or cancelled already
+        require(
+            transfer.status == Status.Pending,
+            "transfer already completed or cancelled"
+        );
 
-        // Mark transfer as completed
-        transfer.completed = true;
+        // Mark transfer status as cancelled
+        transfer.status = Status.Cancelled;
 
         // Transfer the tokens back to the sender using SafeERC20
         SafeERC20.safeTransfer(
@@ -191,6 +219,6 @@ contract LocalCoinSettlementV2 is Ownable {
             transfer.amount
         );
 
-        emit Refund(_transferHash, transfer.origin);
+        emit TransferCancelled(_transferHash, transfer.origin);
     }
 }

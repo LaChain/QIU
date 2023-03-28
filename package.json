@@ -24,6 +24,7 @@
     "@typechain/hardhat": "^6.1.2",
     "chai": "^4.3.6",
     "dotenv": "^16.0.2",
+    "dotenv-defaults": "^5.0.2",
     "eth-crypto": "^2.6.0",
     "ethers": "^5.7.0",
     "hardhat-gas-reporter": "^1.0.8",
