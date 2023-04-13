@@ -26,3 +26,6 @@ Run Tests:
 ```
 npm run test
 ```
+
+Guide to deploy contracts [here](/docs/deploy.md).
+Guide to test the lcs-flow [here](/docs/lcs-flow.md).
