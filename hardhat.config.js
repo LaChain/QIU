@@ -1,6 +1,8 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv-defaults").config();
-require("./tasks/register-entity");
+require("./tasks/erc20/erc20-tasks");
+require("./tasks/lcsV2/lcsV2-tasks");
+require("./tasks/utils/utils-tasks");
 
 const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
 const LACHAIN_TESTNET_RPC_URL = process.env.LACHAIN_TESTNET_RPC_URL;
@@ -15,14 +17,14 @@ module.exports = {
       url: GOERLI_RPC_URL,
       accounts: [PRIVATE_KEY],
       chainId: 5,
-      gasPrice: 30000000000,
+      gasPrice: 200000000000,
     },
     lachain: {
       url: LACHAIN_TESTNET_RPC_URL,
       accounts: [PRIVATE_KEY],
       chainId: 418,
       gasPrice: 10000000,
-      gasMultiplier: 3,
+      gasMultiplier: 1.5,
     },
   },
   etherscan: {
