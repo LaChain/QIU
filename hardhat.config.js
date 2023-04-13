@@ -3,6 +3,7 @@ require("dotenv-defaults").config();
 require("./tasks/register-entity");
 
 const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
+const LACHAIN_TESTNET_RPC_URL = process.env.LACHAIN_TESTNET_RPC_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY;
 
@@ -15,6 +16,13 @@ module.exports = {
       accounts: [PRIVATE_KEY],
       chainId: 5,
       gasPrice: 30000000000,
+    },
+    lachain: {
+      url: LACHAIN_TESTNET_RPC_URL,
+      accounts: [PRIVATE_KEY],
+      chainId: 418,
+      gasPrice: 10000000,
+      gasMultiplier: 3,
     },
   },
   etherscan: {
