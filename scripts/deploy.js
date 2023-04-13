@@ -27,18 +27,16 @@ async function main() {
   console.log(`ERC20 deployed to ${tERC20.address}`);
 
   console.log("Deploying LocalCoinSettlement...");
-  const LocalCoinSettlement = await hre.ethers.getContractFactory(
+  const LocalCoinSettlementV2 = await hre.ethers.getContractFactory(
     "LocalCoinSettlement"
   );
-  const localCoinSettlement = await LocalCoinSettlement.connect(owner).deploy(
-    tERC20.address
+  const localCoinSettlementV2 = await LocalCoinSettlementV2.connect(
+    owner
+  ).deploy(tERC20.address);
+  await localCoinSettlementV2.deployed();
+  console.log(
+    `LocalCoinSettlement deployed to ${localCoinSettlementV2.address}`
   );
-  await localCoinSettlement.deployed();
-  console.log(`LocalCoinSettlement deployed to ${localCoinSettlement.address}`);
-
-  // console.log(`Approving gameQuiz contract to handle owner tokens...`);
-  // await tERC20.connect(owner).approve(quizGame.address, initialBalance);
-  // console.log("Approved");
 
   if (hre.network.config.chainId === 5 && hre.config.etherscan.apiKey.goerli) {
     console.log("Waiting for block confirmations...");
