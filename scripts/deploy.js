@@ -5,6 +5,7 @@
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
 const hre = require("hardhat");
+const { verify } = require("./utils.js");
 
 function bn(x) {
   return hre.ethers.BigNumber.from(x);
@@ -26,24 +27,33 @@ async function main() {
   await tERC20.deployed();
   console.log(`ERC20 deployed to ${tERC20.address}`);
 
-  console.log("Deploying LocalCoinSettlement...");
-  const LocalCoinSettlement = await hre.ethers.getContractFactory(
-    "LocalCoinSettlement"
-  );
-  const localCoinSettlement = await LocalCoinSettlement.connect(owner).deploy(
-    tERC20.address
-  );
-  await localCoinSettlement.deployed();
-  console.log(`LocalCoinSettlement deployed to ${localCoinSettlement.address}`);
-
-  // console.log(`Approving gameQuiz contract to handle owner tokens...`);
-  // await tERC20.connect(owner).approve(quizGame.address, initialBalance);
-  // console.log("Approved");
-
-  if (hre.network.config.chainId === 5 && hre.config.etherscan.apiKey.goerli) {
+  if (hre.network.config.chainId === 5 && hre.config.etherscan.apiKey) {
     console.log("Waiting for block confirmations...");
     await tERC20.deployTransaction.wait(6);
-    await verify(tERC20.address, [taskArgs.name, taskArgs.symbol]);
+    await verify(tERC20.address, [
+      "Num Ars",
+      "NARS",
+      owner.address,
+      initialBalance,
+    ]);
+  }
+
+  console.log("Deploying LocalCoinSettlementV2...");
+  const LocalCoinSettlementV2 = await hre.ethers.getContractFactory(
+    "LocalCoinSettlementV2"
+  );
+  const localCoinSettlementV2 = await LocalCoinSettlementV2.connect(
+    owner
+  ).deploy(tERC20.address);
+  await localCoinSettlementV2.deployed();
+  console.log(
+    `LocalCoinSettlementV2 deployed to ${localCoinSettlementV2.address}`
+  );
+
+  if (hre.network.config.chainId === 5 && hre.config.etherscan.apiKey) {
+    console.log("Waiting for block confirmations...");
+    await localCoinSettlementV2.deployTransaction.wait(6);
+    await verify(localCoinSettlementV2.address, [tERC20.address]);
   }
 }
 

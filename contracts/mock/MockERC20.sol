@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-// mock class using ERC20
-contract MockERC20 is ERC20 {
+contract MockERC20 is ERC20, Pausable, Ownable {
     constructor(
         string memory name,
         string memory symbol,
@@ -15,27 +15,23 @@ contract MockERC20 is ERC20 {
         _mint(initialAccount, initialBalance);
     }
 
-    function mint(address account, uint256 amount) public {
-        _mint(account, amount);
+    function pause() public onlyOwner {
+        _pause();
     }
 
-    function burn(address account, uint256 amount) public {
-        _burn(account, amount);
+    function unpause() public onlyOwner {
+        _unpause();
     }
 
-    function transferInternal(
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
+
+    function _beforeTokenTransfer(
         address from,
         address to,
-        uint256 value
-    ) public {
-        _transfer(from, to, value);
-    }
-
-    function approveInternal(
-        address owner,
-        address spender,
-        uint256 value
-    ) public {
-        _approve(owner, spender, value);
+        uint256 amount
+    ) internal override whenNotPaused {
+        super._beforeTokenTransfer(from, to, amount);
     }
 }
