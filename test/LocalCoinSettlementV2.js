@@ -428,8 +428,8 @@ describe("Test LocalCoinSettlementV2", function () {
         .connect(owner)
         .registerEntity(ent2.address, providerId2, pubKey2);
 
-      const origin = "user_id_dest@mercadopago";
-      const destination = "user_id_ori@ripio";
+      const origin = "user_alias_ori@mercadopago";
+      const destination = "user_alias_dest@ripio";
       const tokenAmount = "1";
 
       const encryptedOrigin = "0x" + (await encrypt(ent2.publicKey, origin));
