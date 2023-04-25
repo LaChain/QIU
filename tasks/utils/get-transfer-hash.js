@@ -5,8 +5,8 @@ task("get-transfer-hash", "Get transfer hash")
   .addParam("sender", "Address of the sender entity")
   .addParam("destination", "Address of the destination entity")
   .addParam("amount", "Amount of the transfer request")
-  .addParam("encryptedCvuOrigin", "encripted cvu of origin")
-  .addParam("encryptedCvuDestination", "encripted cvu of destination")
+  .addParam("encryptedOrigin", "encripted origin")
+  .addParam("encryptedDestination", "encripted destination")
   .addParam("expiration", "expiration time of the transfer request")
   .setAction(async (taskArgs, hre) => {
     const lcs = (
@@ -22,8 +22,8 @@ task("get-transfer-hash", "Get transfer hash")
         taskArgs.sender,
         taskArgs.destination,
         amount,
-        taskArgs.encryptedCvuOrigin,
-        taskArgs.encryptedCvuDestination,
+        taskArgs.encryptedOrigin,
+        taskArgs.encryptedDestination,
         senderInfo.nonce,
         taskArgs.expiration,
       ]

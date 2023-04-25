@@ -13,8 +13,8 @@ task("transfer-info", "Get transfer info")
       origin: transferInfo.origin,
       destination: transferInfo.destination,
       amount: transferInfo.amount.toString(),
-      encryptedCvuOrigin: transferInfo.encryptedCvuOrigin,
-      encryptedCvuDestination: transferInfo.encryptedCvuDestination,
+      encryptedOrigin: transferInfo.encryptedOrigin,
+      encryptedDestination: transferInfo.encryptedDestination,
       expiration: transferInfo.expiration.toString(),
       status: transferInfo.status.toString(),
     });

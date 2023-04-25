@@ -4,8 +4,8 @@ task("transfer-request", "Initiate a transfer request")
   .addParam("contractAddress", "lcs contract address")
   .addParam("destination", "Address of the destination entity")
   .addParam("amount", "Amount of the transfer request")
-  .addParam("encryptedCvuOrigin", "encripted cvu of origin")
-  .addParam("encryptedCvuDestination", "encripted cvu of destination")
+  .addParam("encryptedOrigin", "encrypted origin")
+  .addParam("encryptedDestination", "encrypted destination")
   .addParam("expiration", "expiration time of the transfer request")
   .setAction(async (taskArgs, hre) => {
     let [sender] = await hre.ethers.getSigners();
@@ -22,8 +22,8 @@ task("transfer-request", "Initiate a transfer request")
       sender: sender.address,
       destination: taskArgs.destination,
       amount: taskArgs.amount,
-      encryptedCvuOrigin: taskArgs.encryptedCvuOrigin,
-      encryptedCvuDestination: taskArgs.encryptedCvuDestination,
+      encryptedOrigin: taskArgs.encryptedOrigin,
+      encryptedDestination: taskArgs.encryptedDestination,
       expiration: taskArgs.expiration,
     });
 
@@ -33,8 +33,8 @@ task("transfer-request", "Initiate a transfer request")
       .transferRequest(
         taskArgs.destination,
         amount,
-        taskArgs.encryptedCvuOrigin,
-        taskArgs.encryptedCvuDestination,
+        taskArgs.encryptedOrigin,
+        taskArgs.encryptedDestination,
         taskArgs.expiration
       );
     await transferRequestTx.wait(1);
