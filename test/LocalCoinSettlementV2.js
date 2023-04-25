@@ -1,6 +1,6 @@
 const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
-const EthCrypto = require("eth-crypto");
+const { createIdentity, encrypt, decrypt } = require("./utils");
 const {
   loadFixture,
   time,
@@ -20,9 +20,9 @@ describe("Test LocalCoinSettlementV2", function () {
   async function deployFixture() {
     [owner] = await hre.ethers.getSigners();
 
-    ent1 = EthCrypto.createIdentity();
-    ent2 = EthCrypto.createIdentity();
-    ent3 = EthCrypto.createIdentity();
+    ent1 = createIdentity();
+    ent2 = createIdentity();
+    ent3 = createIdentity();
     const provider = hre.ethers.provider;
     entity1 = new hre.ethers.Wallet(ent1.privateKey).connect(provider);
     entity2 = new hre.ethers.Wallet(ent2.privateKey).connect(provider);
@@ -407,6 +407,60 @@ describe("Test LocalCoinSettlementV2", function () {
       const transferInfo2 = await lcs.transfers(transferHash);
       assert.equal(transferInfo1.status, 2);
       assert.equal(transferInfo2.status, 2);
+    });
+  });
+
+  describe("e2e - Transfer using alias", function () {
+    it("Should use alias for transfers", async function () {
+      const { owner, ent1, ent2, entity1, entity2, tERC20, lcs } =
+        await loadFixture(deployFixture);
+
+      // register origin and destination
+      const providerId = "00000031";
+      const pubKey1 = "0x" + ent1.publicKey;
+      await lcs
+        .connect(owner)
+        .registerEntity(ent1.address, providerId, pubKey1);
+
+      const providerId2 = "00001478";
+      const pubKey2 = "0x" + ent2.publicKey;
+      await lcs
+        .connect(owner)
+        .registerEntity(ent2.address, providerId2, pubKey2);
+
+      const origin = "user_id_dest@mercadopago";
+      const destination = "user_id_ori@ripio";
+      const tokenAmount = "1";
+
+      const encryptedOrigin = "0x" + (await encrypt(ent2.publicKey, origin));
+      const encryptedDestination =
+        "0x" + (await encrypt(ent2.publicKey, destination));
+
+      const expiryTime = (await time.latest()) + ONE_WEEK_IN_SECS + 1;
+
+      const transferHash = await newTransferRequest(
+        tERC20,
+        lcs,
+        entity1,
+        entity2.address,
+        tokenAmount,
+        encryptedOrigin,
+        encryptedDestination,
+        expiryTime
+      );
+      const balanceBefore = await tERC20.balanceOf(entity2.address);
+      await lcs.connect(entity2).batchAcceptTransfer([transferHash]);
+
+      const balanceAfter = await tERC20.balanceOf(entity2.address);
+      expect(bn(balanceBefore).add(tokenAmount), balanceAfter).to.be.equal;
+
+      const decryptOrigin = await decrypt(entity2.privateKey, encryptedOrigin);
+      const decryptDestination = await decrypt(
+        entity2.privateKey,
+        encryptedDestination
+      );
+      assert.equal(decryptOrigin, origin);
+      assert.equal(decryptDestination, destination);
     });
   });
 });
