@@ -27,8 +27,8 @@ contract LocalCoinSettlementV2 is Ownable {
         address origin;
         address destination;
         uint256 amount;
-        bytes encryptedCvuOrigin;
-        bytes encryptedCvuDestination;
+        bytes encryptedOrigin;
+        bytes encryptedDestination;
         uint256 nonce;
         uint256 expiration;
         Status status;
@@ -47,8 +47,8 @@ contract LocalCoinSettlementV2 is Ownable {
         address indexed sender,
         address indexed recipient,
         uint256 amount,
-        bytes encryptedCvuOrigin,
-        bytes encryptedCvuDestination,
+        bytes encryptedOrigin,
+        bytes encryptedDestination,
         uint256 nonce,
         uint256 expiration
     );
@@ -86,8 +86,8 @@ contract LocalCoinSettlementV2 is Ownable {
     function transferRequest(
         address _destination,
         uint256 _amount,
-        bytes memory _encryptedCvuOrigin,
-        bytes memory _encryptedCvuDestination,
+        bytes memory _encryptedOrigin,
+        bytes memory _encryptedDestination,
         uint256 _expiration
     ) external returns (bytes32) {
         Entity storage originInfo = entities[msg.sender];
@@ -108,8 +108,8 @@ contract LocalCoinSettlementV2 is Ownable {
                 msg.sender,
                 _destination,
                 _amount,
-                _encryptedCvuOrigin,
-                _encryptedCvuDestination,
+                _encryptedOrigin,
+                _encryptedDestination,
                 originInfo.nonce,
                 _expiration
             )
@@ -120,8 +120,8 @@ contract LocalCoinSettlementV2 is Ownable {
         transfer.origin = msg.sender;
         transfer.destination = _destination;
         transfer.amount = _amount;
-        transfer.encryptedCvuOrigin = _encryptedCvuOrigin;
-        transfer.encryptedCvuDestination = _encryptedCvuDestination;
+        transfer.encryptedOrigin = _encryptedOrigin;
+        transfer.encryptedDestination = _encryptedDestination;
         transfer.nonce = originInfo.nonce;
         transfer.expiration = block.timestamp + _expiration;
         transfer.status = Status.Pending;
@@ -141,8 +141,8 @@ contract LocalCoinSettlementV2 is Ownable {
             msg.sender,
             _destination,
             _amount,
-            _encryptedCvuOrigin,
-            _encryptedCvuDestination,
+            _encryptedOrigin,
+            _encryptedDestination,
             transfer.nonce,
             _expiration
         );

@@ -89,8 +89,8 @@ describe("Test LocalCoinSettlementV2", function () {
     entityOrigin,
     destinationAddress,
     tokenAmount,
-    encrtyptedCvuOrigin,
-    encrtyptedCvuDestination,
+    encryptedOrigin,
+    encryptedDestination,
     expirationTime
   ) {
     // approve tokens
@@ -103,8 +103,8 @@ describe("Test LocalCoinSettlementV2", function () {
         entityOrigin.address,
         destinationAddress,
         tokenAmount,
-        encrtyptedCvuOrigin,
-        encrtyptedCvuDestination,
+        encryptedOrigin,
+        encryptedDestination,
         entityInfo.nonce,
         expirationTime,
       ]
@@ -115,8 +115,8 @@ describe("Test LocalCoinSettlementV2", function () {
       .transferRequest(
         destinationAddress,
         tokenAmount,
-        encrtyptedCvuOrigin,
-        encrtyptedCvuDestination,
+        encryptedOrigin,
+        encryptedDestination,
         expirationTime
       );
 
@@ -137,8 +137,8 @@ describe("Test LocalCoinSettlementV2", function () {
     await lcs.connect(owner).registerEntity(ent2.address, providerId2, pubKey2);
 
     const tokenAmount = "1";
-    const encrtyptedCvuOrigin = "0x";
-    const encrtyptedCvuDestination = "0x";
+    const encryptedOrigin = "0x";
+    const encryptedDestination = "0x";
     const expiryTime = (await time.latest()) + ONE_WEEK_IN_SECS + 1;
     // approve tokens
     await tERC20.connect(entity1).approve(lcs.address, tokenAmount);
@@ -150,8 +150,8 @@ describe("Test LocalCoinSettlementV2", function () {
         ent1.address,
         ent2.address,
         tokenAmount,
-        encrtyptedCvuOrigin,
-        encrtyptedCvuDestination,
+        encryptedOrigin,
+        encryptedDestination,
         entity1Info.nonce,
         ONE_WEEK_IN_SECS,
       ]
@@ -162,8 +162,8 @@ describe("Test LocalCoinSettlementV2", function () {
         .transferRequest(
           ent2.address,
           tokenAmount,
-          encrtyptedCvuOrigin,
-          encrtyptedCvuDestination,
+          encryptedOrigin,
+          encryptedDestination,
           ONE_WEEK_IN_SECS
         )
     )
@@ -173,8 +173,8 @@ describe("Test LocalCoinSettlementV2", function () {
         ent1.address,
         ent2.address,
         tokenAmount,
-        encrtyptedCvuOrigin,
-        encrtyptedCvuDestination,
+        encryptedOrigin,
+        encryptedDestination,
         entity1Info.nonce,
         ONE_WEEK_IN_SECS
       );
@@ -189,8 +189,8 @@ describe("Test LocalCoinSettlementV2", function () {
       lcs,
       tERC20,
       tokenAmount,
-      encrtyptedCvuOrigin,
-      encrtyptedCvuDestination,
+      encryptedOrigin,
+      encryptedDestination,
       transferHash,
       entity1Info,
       expiryTime,
