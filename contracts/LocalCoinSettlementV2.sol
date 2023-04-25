@@ -33,6 +33,7 @@ contract LocalCoinSettlementV2 is Ownable {
         uint256 nonce;
         uint256 expiration;
         Status status;
+        string externalRef;
     }
 
     mapping(bytes32 => Transfer) public transfers;
@@ -52,7 +53,8 @@ contract LocalCoinSettlementV2 is Ownable {
         bytes encryptedOrigin,
         bytes encryptedDestination,
         uint256 nonce,
-        uint256 expiration
+        uint256 expiration,
+        string externalRef
     );
 
     event TransferAccepted(
@@ -111,7 +113,8 @@ contract LocalCoinSettlementV2 is Ownable {
         uint256 _amount,
         bytes memory _encryptedOrigin,
         bytes memory _encryptedDestination,
-        uint256 _expiration
+        uint256 _expiration,
+        string memory _externalRef
     ) external returns (bytes32) {
         Entity storage originInfo = entities[msg.sender];
 
@@ -148,6 +151,7 @@ contract LocalCoinSettlementV2 is Ownable {
         transfer.nonce = originInfo.nonce;
         transfer.expiration = block.timestamp + _expiration;
         transfer.status = Status.Pending;
+        transfer.externalRef = _externalRef;
 
         originInfo.nonce += 1;
 
@@ -167,7 +171,8 @@ contract LocalCoinSettlementV2 is Ownable {
             _encryptedOrigin,
             _encryptedDestination,
             transfer.nonce,
-            _expiration
+            _expiration,
+            _externalRef
         );
 
         return transferHash;

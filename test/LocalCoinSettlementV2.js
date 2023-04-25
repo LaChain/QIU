@@ -91,7 +91,8 @@ describe("Test LocalCoinSettlementV2", function () {
     tokenAmount,
     encryptedOrigin,
     encryptedDestination,
-    expirationTime
+    expirationTime,
+    externalReference
   ) {
     // approve tokens
     await tERC20.connect(entityOrigin).approve(lcs.address, tokenAmount);
@@ -117,7 +118,8 @@ describe("Test LocalCoinSettlementV2", function () {
         tokenAmount,
         encryptedOrigin,
         encryptedDestination,
-        expirationTime
+        expirationTime,
+        externalReference
       );
 
     return transferHash;
@@ -146,6 +148,7 @@ describe("Test LocalCoinSettlementV2", function () {
     const encryptedOrigin = "0x";
     const encryptedDestination = "0x";
     const expiryTime = (await time.latest()) + ONE_WEEK_IN_SECS + 1;
+    const externalReference = "0x";
     // approve tokens
     await tERC20.connect(entity1).approve(lcs.address, tokenAmount);
 
@@ -170,7 +173,8 @@ describe("Test LocalCoinSettlementV2", function () {
           tokenAmount,
           encryptedOrigin,
           encryptedDestination,
-          ONE_WEEK_IN_SECS
+          ONE_WEEK_IN_SECS,
+          externalReference
         )
     )
       .to.emit(lcs, "NewTransferRequest")
@@ -182,7 +186,8 @@ describe("Test LocalCoinSettlementV2", function () {
         encryptedOrigin,
         encryptedDestination,
         entity1Info.nonce,
-        ONE_WEEK_IN_SECS
+        ONE_WEEK_IN_SECS,
+        externalReference
       );
 
     return {
@@ -277,7 +282,14 @@ describe("Test LocalCoinSettlementV2", function () {
       await expect(
         lcs
           .connect(entity1)
-          .transferRequest(ent2.address, "1", "0x", "0x", ONE_WEEK_IN_SECS)
+          .transferRequest(
+            ent2.address,
+            "1",
+            "0x",
+            "0x",
+            ONE_WEEK_IN_SECS,
+            "0x"
+          )
       ).to.be.revertedWith("origin entity not registered");
     });
 
@@ -296,7 +308,14 @@ describe("Test LocalCoinSettlementV2", function () {
       await expect(
         lcs
           .connect(entity1)
-          .transferRequest(ent2.address, "1", "0x", "0x", ONE_WEEK_IN_SECS)
+          .transferRequest(
+            ent2.address,
+            "1",
+            "0x",
+            "0x",
+            ONE_WEEK_IN_SECS,
+            "0x"
+          )
       ).to.be.revertedWith("destination entity not registered");
     });
 
@@ -323,7 +342,14 @@ describe("Test LocalCoinSettlementV2", function () {
       await expect(
         lcs
           .connect(entity1)
-          .transferRequest(ent2.address, "1", "0x", "0x", ONE_WEEK_IN_SECS)
+          .transferRequest(
+            ent2.address,
+            "1",
+            "0x",
+            "0x",
+            ONE_WEEK_IN_SECS,
+            "0x"
+          )
       ).to.be.revertedWith("ERC20: insufficient allowance");
     });
     it("should transfer tokens from ent1 to contract and emit transferRequest event", async function () {
@@ -399,7 +425,8 @@ describe("Test LocalCoinSettlementV2", function () {
         tokenAmount,
         "0x",
         "0x",
-        ONE_WEEK_IN_SECS
+        ONE_WEEK_IN_SECS,
+        "0x"
       );
       await await lcs
         .connect(entity2)
@@ -470,7 +497,8 @@ describe("Test LocalCoinSettlementV2", function () {
         tokenAmount,
         "0x",
         "0x",
-        ONE_WEEK_IN_SECS
+        ONE_WEEK_IN_SECS,
+        "0x"
       );
 
       const transferInfo2before = await lcs.transfers(transferHash2);
@@ -517,6 +545,7 @@ describe("Test LocalCoinSettlementV2", function () {
         "0x" + (await encrypt(ent2.publicKey, destination));
 
       const expiryTime = (await time.latest()) + ONE_WEEK_IN_SECS + 1;
+      const externalReference = "0x";
 
       const transferHash = await newTransferRequest(
         tERC20,
@@ -526,7 +555,8 @@ describe("Test LocalCoinSettlementV2", function () {
         tokenAmount,
         encryptedOrigin,
         encryptedDestination,
-        expiryTime
+        expiryTime,
+        externalReference
       );
       const balanceBefore = await tERC20.balanceOf(entity2.address);
       await lcs.connect(entity2).batchAcceptTransfer([transferHash]);
