@@ -9,6 +9,7 @@ contract LocalCoinSettlementV2 is Ownable {
     struct Entity {
         uint32 entityId;
         uint224 nonce;
+        string domain;
         bytes publicKey;
     }
 
@@ -36,9 +37,10 @@ contract LocalCoinSettlementV2 is Ownable {
 
     mapping(bytes32 => Transfer) public transfers;
 
-    event NewEntity(
+    event EntityUpdated(
         address indexed entityAddress,
         uint32 indexed entityId,
+        string domain,
         bytes publicKey
     );
 
@@ -71,14 +73,35 @@ contract LocalCoinSettlementV2 is Ownable {
     function registerEntity(
         address _entityAddress,
         uint32 _entityId,
+        string memory _domain,
         bytes memory _publicKey
     ) public onlyOwner {
         require(_entityId != 0, "entityId can not be 0");
         Entity storage entity = entities[_entityAddress];
         entity.entityId = _entityId;
+        entity.domain = _domain;
         entity.publicKey = _publicKey;
 
-        emit NewEntity(_entityAddress, _entityId, _publicKey);
+        emit EntityUpdated(_entityAddress, _entityId, _domain, _publicKey);
+    }
+
+    // Update an existing entity (only owner)
+    function modifyEntity(
+        address _entityAddress,
+        uint32 _entityId,
+        string memory _domain,
+        bytes memory _publicKey
+    ) public onlyOwner {
+        require(_entityId != 0, "entityId cannot be 0");
+        Entity storage entity = entities[_entityAddress];
+        require(entity.entityId != 0, "entity not registered");
+
+        // Update entity data
+        entity.entityId = _entityId;
+        entity.domain = _domain;
+        entity.publicKey = _publicKey;
+
+        emit EntityUpdated(_entityAddress, _entityId, _domain, _publicKey);
     }
 
     // Create a new transfer request (sender)
