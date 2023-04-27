@@ -28,7 +28,7 @@ task("get-transfer-hash", "Get transfer hash")
         "uint256",
         "bytes",
         "bytes",
-        "uint224",
+        "uint256",
         "uint256",
       ],
       [
