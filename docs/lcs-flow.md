@@ -5,8 +5,8 @@
 Example:
 
 ```
-ERC20: 0x903CA313eB4944663aC470Cf88152dF1f27ffc0f
-LocalCoinSettlementV2: 0x9546bB1A1aF05717819E4bCb756EA95D5C9D17A4
+ERC20: 0x3b9d9e6c956f2885a272ca1da2aa63bf59bdf939
+LocalCoinSettlementV2: 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC
 ```
 
 ## Setup env vars
@@ -36,27 +36,29 @@ address: '0xB9476fa0c25367b24506cDc50FB62CadD2392DD7'
 ## Register entity 1 (sender: admin)
 
 Example entity data : {
+domain: entity1.cvu
 entityId: 00001478
-privateKey: '0xcf7...',
-publicKey: '50e2459c79c543438f524926dae44dcba2dc18c554ff98c59c903abdc19f55314b99d2161634ae09179ac7cd59a420283357ba335134d8a24f6bee7c126ea85e',
-address: '0x91D13B797e6aA9a4A4F63b05851ADE4Cd02CB765'
+privateKey: '0xd84..',
+publicKey: '56e67a981b41f64c587bb9750ca5d6cd12f240c6f6ba2439277f882843d5054629efaefbf549e99e5e2768f6acfb458c92dd6abfe8ceccf1418a2caca3dea607',
+address: '0xA4C0c9e95ef693464383b9CF4E405d9a3E7aE825'
 }
 
 ```
-npx hardhat --network lachain register-entity --contract-address 0x9546bB1A1aF05717819E4bCb756EA95D5C9D17A4 --entity-address 0x91D13B797e6aA9a4A4F63b05851ADE4Cd02CB765 --entity-id "00001478" --public-key 0x50e2459c79c543438f524926dae44dcba2dc18c554ff98c59c903abdc19f55314b99d2161634ae09179ac7cd59a420283357ba335134d8a24f6bee7c126ea85e
+npx hardhat --network lachain register-entity --contract-address 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC --entity-address 0xA4C0c9e95ef693464383b9CF4E405d9a3E7aE825 --domain "entity1.cvu" --entity-id "00001478" --public-key 0x56e67a981b41f64c587bb9750ca5d6cd12f240c6f6ba2439277f882843d5054629efaefbf549e99e5e2768f6acfb458c92dd6abfe8ceccf1418a2caca3dea607
 ```
 
 ## Register entity 2 (sender: admin)
 
 Example entity data : {
-entityId: 00001500
-privateKey: '0x93b...',
-publicKey: '118dc411e6d12546c8e062dee241208b06a2d1e60424e12befe78a5740f395fac3d48bf40c2876192dad7f5f57c58cffc69516262fee7287b6249e0edb80f605',
-address: '0xF88E310B740f700Ac8f06cc1e57a28297eD62C3D'
+domain: entity2.cvu
+entityId: 00000031
+privateKey: '0xe42..',
+publicKey: 'cc95c03effdb2486c2f59878125840bfce43324452c8ae63a992adeb77b7c9049c81e96b7dc23df9d291c776f9aee699e6655785a593aa3958ed677b0b91c120',
+address: '0x39f76952100495698C5a9a0441DcD14fBB814bE3'
 }
 
 ```
-npx hardhat --network lachain register-entity --contract-address 0x9546bB1A1aF05717819E4bCb756EA95D5C9D17A4 --entity-address 0xF88E310B740f700Ac8f06cc1e57a28297eD62C3D --entity-id "00001500" --public-key 0x118dc411e6d12546c8e062dee241208b06a2d1e60424e12befe78a5740f395fac3d48bf40c2876192dad7f5f57c58cffc69516262fee7287b6249e0edb80f605
+npx hardhat --network lachain register-entity --contract-address 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC --entity-address 0x39f76952100495698C5a9a0441DcD14fBB814bE3 --domain "entity2.cvu" --entity-id "00000031" --public-key 0xcc95c03effdb2486c2f59878125840bfce43324452c8ae63a992adeb77b7c9049c81e96b7dc23df9d291c776f9aee699e6655785a593aa3958ed677b0b91c120
 ```
 
 ## Set up entities
@@ -64,79 +66,79 @@ npx hardhat --network lachain register-entity --contract-address 0x9546bB1A1aF05
 ### Transfer native currency to entities (sender: admin)
 
 ```
-npx hardhat --network lachain native-transfer --to 0x91D13B797e6aA9a4A4F63b05851ADE4Cd02CB765 --amount 1
+npx hardhat --network lachain native-transfer --to 0xA4C0c9e95ef693464383b9CF4E405d9a3E7aE825 --amount 0.01
 ```
 
 ```
-npx hardhat --network lachain native-transfer --to 0xF88E310B740f700Ac8f06cc1e57a28297eD62C3D --amount 1
+npx hardhat --network lachain native-transfer --to 0x39f76952100495698C5a9a0441DcD14fBB814bE3 --amount 0.01
 
 ```
 
 ### Transfer tokens to entities (sender: admin)
 
 ```
-npx hardhat --network lachain erc20-transfer --erc20-address 0x903CA313eB4944663aC470Cf88152dF1f27ffc0f --to 0x91D13B797e6aA9a4A4F63b05851ADE4Cd02CB765 --amount 100
+npx hardhat --network lachain erc20-transfer --erc20-address 0x3b9d9e6c956f2885a272ca1da2aa63bf59bdf939 --to 0xA4C0c9e95ef693464383b9CF4E405d9a3E7aE825 --amount 100
 ```
 
 ```
-npx hardhat --network lachain erc20-transfer --erc20-address 0x903CA313eB4944663aC470Cf88152dF1f27ffc0f --to 0xF88E310B740f700Ac8f06cc1e57a28297eD62C3D --amount 100
+npx hardhat --network lachain erc20-transfer --erc20-address 0x3b9d9e6c956f2885a272ca1da2aa63bf59bdf939 --to 0x39f76952100495698C5a9a0441DcD14fBB814bE3 --amount 100
 ```
 
 ## Step 2 - transfer Request (sender: entity 1)
 
-exampleCVUOrigin = "0000147800036521571806";
-exampleCVUDestination = "0000150000036521572030";
+userOrigin = "user_origin";
+userDestination = "user_destination";
 
-how to encrypt cvu in helper section.
+how to encrypt data in helper section.
 
 ### Approve tokens to lcs contract (sender: entity 1)
 
 ```
-npx hardhat --network lachain erc20-approve --erc20-address 0x903CA313eB4944663aC470Cf88152dF1f27ffc0f --spender 0x9546bB1A1aF05717819E4bCb756EA95D5C9D17A4 --amount 100
+npx hardhat --network lachain erc20-approve --erc20-address 0x3b9d9e6c956f2885a272ca1da2aa63bf59bdf939 --spender 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC --amount 100
 ```
 
 ### send transfer Request (sender: entity 1)
 
 ```
-npx hardhat --network lachain transfer-request --contract-address 0x9546bB1A1aF05717819E4bCb756EA95D5C9D17A4 --destination 0xF88E310B740f700Ac8f06cc1e57a28297eD62C3D --amount 1 --encrypted-cvu-origin 0xd2f1037735a3544fc40eeb8f0aa5457703632030f868014eb168d6b9b78f75dc9f196f0ee6bd32f8812525715a3e7ba4656ff3de110c34440e7726be87d99b46dcc31f11df5fa622bc04ae6ffc6342721c8a4a86531d82d21cad23ecddcec7ca68881b5542f0440df155ff07a25a186a67 --encrypted-cvu-destination 0x87875cb7fbd76973514bef4268190e1702fe5db3f39994bb28c5d26e9edde07283f8142e9794a630e99fe01481d075688f7a0b7d012b7e4594e587cab16d72fbf83b5557f1907fcb41d62eb71fa27f6ed446513f3e516e42a83adf51de7cda61b3d0404810379df2c6a6334fc3c7ea2f34 --expiration 100000
+npx hardhat --network lachain transfer-request --contract-address 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC --origin-domain entity1.cvu --destination-domain entity2.cvu --amount 1 --encrypted-origin 0x547195888b88195bb660b00241048c7503dffe07cef74791200afff11d2974e7804fea944fc0aaa510162e6f70690de25a60dd14e069cb060628497e22f1472f8fe1a192e5c58b14bbce13552e1f1deb833c8b81396c34e8cc47871d4f6cc96561 --encrypted-destination 0x09cbe19009a59716f03c32a052a9d69c034c12060c846ef364c597bf10f1ccb2a2a4af392762dc943a809dbced34ab3c3a4dbc2c5adcdf57126ccea6b09d00ee134fae48aaf0f7793a7a09490a2a5fdfe12094f76fac3c2bbac80d77aaa2c1d9dcb1acf8aecbfab623676b5f3c62f7362b --expiration 100000 --external-ref ""
 ```
 
-transferHash: 0xbff70361bc6c6c74450bb5a6749299a19526c4bdb58d4ffd231a60bc0fda77bc
+transferHash: 0x449de24bbe3236353b131865d29db1861f4d16b79893ce6007eafee0e0196dfa
 
 ## Step 3 - Batch accept Transfers (sender: entity 2)
 
 ```
-npx hardhat --network lachain batch-accept-transfers --contract-address 0x9546bB1A1aF05717819E4bCb756EA95D5C9D17A4 0xbff70361bc6c6c74450bb5a6749299a19526c4bdb58d4ffd231a60bc0fda77bc
+npx hardhat --network lachain batch-accept-transfers --contract-address 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC 0xe326055a838a06485aafcf790cd621f16aa524aa5602a15d3bc82d918782047a
 ```
 
 ## Helpers
 
-### encrypt cvu
+### encrypt data
 
-exampleCVUOrigin = "0000147800036521571806";
-exampleCVUDestination = "0000150000036521572030";
+userOrigin = "user_origin";
+userDestination = "user_destination";
 
-Encrypt cvu 1:
-
-```
-npx hardhat encrypt-cvu --cvu "0000147800036521571806" --public-key 50e2459c79c543438f524926dae44dcba2dc18c554ff98c59c903abdc19f55314b99d2161634ae09179ac7cd59a420283357ba335134d8a24f6bee7c126ea85e
-```
-
-encryptedCvu: d2f1037735a3544fc40eeb8f0aa5457703632030f868014eb168d6b9b78f75dc9f196f0ee6bd32f8812525715a3e7ba4656ff3de110c34440e7726be87d99b46dcc31f11df5fa622bc04ae6ffc6342721c8a4a86531d82d21cad23ecddcec7ca68881b5542f0440df155ff07a25a186a67
-
-Decrypt cvu:
+Encrypt data exampleOrigin:
 
 ```
-npx hardhat decrypt-cvu --encrypted-cvu d2f1037735a3544fc40eeb8f0aa5457703632030f868014eb168d6b9b78f75dc9f196f0ee6bd32f8812525715a3e7ba4656ff3de110c34440e7726be87d99b46dcc31f11df5fa622bc04ae6ffc6342721c8a4a86531d82d21cad23ecddcec7ca68881b5542f0440df155ff07a25a186a67 --private-key 0xcf..
+npx hardhat encrypt --data "user_origin" --public-key cc95c03effdb2486c2f59878125840bfce43324452c8ae63a992adeb77b7c9049c81e96b7dc23df9d291c776f9aee699e6655785a593aa3958ed677b0b91c120
 ```
 
-Encrypt cvu 2:
+encryptedData: 547195888b88195bb660b00241048c7503dffe07cef74791200afff11d2974e7804fea944fc0aaa510162e6f70690de25a60dd14e069cb060628497e22f1472f8fe1a192e5c58b14bbce13552e1f1deb833c8b81396c34e8cc47871d4f6cc96561
+
+Decrypt data:
 
 ```
-npx hardhat encrypt-cvu --cvu "0000150000036521572030" --public-key 118dc411e6d12546c8e062dee241208b06a2d1e60424e12befe78a5740f395fac3d48bf40c2876192dad7f5f57c58cffc69516262fee7287b6249e0edb80f605
+npx hardhat decrypt --encrypted-data 547195888b88195bb660b00241048c7503dffe07cef74791200afff11d2974e7804fea944fc0aaa510162e6f70690de25a60dd14e069cb060628497e22f1472f8fe1a192e5c58b14bbce13552e1f1deb833c8b81396c34e8cc47871d4f6cc96561 --private-key 0xe42...
 ```
 
-encryptedCvu: 87875cb7fbd76973514bef4268190e1702fe5db3f39994bb28c5d26e9edde07283f8142e9794a630e99fe01481d075688f7a0b7d012b7e4594e587cab16d72fbf83b5557f1907fcb41d62eb71fa27f6ed446513f3e516e42a83adf51de7cda61b3d0404810379df2c6a6334fc3c7ea2f34
+Encrypt data exampleDestination:
+
+```
+npx hardhat encrypt --data "user_destination" --public-key cc95c03effdb2486c2f59878125840bfce43324452c8ae63a992adeb77b7c9049c81e96b7dc23df9d291c776f9aee699e6655785a593aa3958ed677b0b91c120
+```
+
+encryptedCvu: 09cbe19009a59716f03c32a052a9d69c034c12060c846ef364c597bf10f1ccb2a2a4af392762dc943a809dbced34ab3c3a4dbc2c5adcdf57126ccea6b09d00ee134fae48aaf0f7793a7a09490a2a5fdfe12094f76fac3c2bbac80d77aaa2c1d9dcb1acf8aecbfab623676b5f3c62f7362b
 
 ### check balance erc20 tokens
 
