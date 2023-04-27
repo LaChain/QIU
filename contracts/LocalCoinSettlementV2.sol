@@ -10,8 +10,7 @@ contract LocalCoinSettlementV2 is Ownable {
     struct EntityInfo {
         bytes32 domainHash;
         address entityAddress;
-        uint32 entityId;
-        uint224 nonce;
+        uint256 nonce;
         string domain;
         bytes publicKey;
         bool disable;
@@ -45,7 +44,6 @@ contract LocalCoinSettlementV2 is Ownable {
     event EntityUpdated(
         bytes32 indexed domainHash,
         address indexed entityAddress,
-        uint32 entityId,
         string domain,
         bytes publicKey
     );
@@ -80,7 +78,6 @@ contract LocalCoinSettlementV2 is Ownable {
     function registerEntity(
         string memory _domain,
         address _entityAddress,
-        uint32 _entityId,
         bytes memory _publicKey
     ) public onlyOwner {
         require(bytes(_domain).length > 0, "domain can not be empty");
@@ -91,19 +88,12 @@ contract LocalCoinSettlementV2 is Ownable {
 
         entity.domainHash = domainHash;
         entity.entityAddress = _entityAddress;
-        entity.entityId = _entityId;
         entity.domain = _domain;
         entity.publicKey = _publicKey;
 
         entities.push(domainHash);
 
-        emit EntityUpdated(
-            domainHash,
-            _entityAddress,
-            _entityId,
-            _domain,
-            _publicKey
-        );
+        emit EntityUpdated(domainHash, _entityAddress, _domain, _publicKey);
     }
 
     // Disable an existing entity (only owner)
@@ -170,7 +160,7 @@ contract LocalCoinSettlementV2 is Ownable {
                 _expiration
             )
         );
-        uint224 transferNonce = originInfo.nonce;
+        uint256 transferNonce = originInfo.nonce;
         {
             Transfer storage transfer = transfers[transferHash];
 

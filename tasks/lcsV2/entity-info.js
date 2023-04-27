@@ -12,7 +12,6 @@ task("entity-info", "Get entity info")
     console.log({
       domainHash: taskArgs.domainHash,
       entityAddress: entityInfo.entityAddress,
-      entityId: entityInfo.entityId.toString(),
       nonce: entityInfo.nonce.toString(),
       domain: entityInfo.domain,
       publicKey: entityInfo.publicKey,

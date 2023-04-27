@@ -37,28 +37,26 @@ address: '0xB9476fa0c25367b24506cDc50FB62CadD2392DD7'
 
 Example entity data : {
 domain: entity1.cvu
-entityId: 00001478
 privateKey: '0xd84..',
 publicKey: '56e67a981b41f64c587bb9750ca5d6cd12f240c6f6ba2439277f882843d5054629efaefbf549e99e5e2768f6acfb458c92dd6abfe8ceccf1418a2caca3dea607',
 address: '0xA4C0c9e95ef693464383b9CF4E405d9a3E7aE825'
 }
 
 ```
-npx hardhat --network lachain register-entity --contract-address 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC --entity-address 0xA4C0c9e95ef693464383b9CF4E405d9a3E7aE825 --domain "entity1.cvu" --entity-id "00001478" --public-key 0x56e67a981b41f64c587bb9750ca5d6cd12f240c6f6ba2439277f882843d5054629efaefbf549e99e5e2768f6acfb458c92dd6abfe8ceccf1418a2caca3dea607
+npx hardhat --network lachain register-entity --contract-address 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC --entity-address 0xA4C0c9e95ef693464383b9CF4E405d9a3E7aE825 --domain "entity1.cvu" --public-key 0x56e67a981b41f64c587bb9750ca5d6cd12f240c6f6ba2439277f882843d5054629efaefbf549e99e5e2768f6acfb458c92dd6abfe8ceccf1418a2caca3dea607
 ```
 
 ## Register entity 2 (sender: admin)
 
 Example entity data : {
 domain: entity2.cvu
-entityId: 00000031
 privateKey: '0xe42..',
 publicKey: 'cc95c03effdb2486c2f59878125840bfce43324452c8ae63a992adeb77b7c9049c81e96b7dc23df9d291c776f9aee699e6655785a593aa3958ed677b0b91c120',
 address: '0x39f76952100495698C5a9a0441DcD14fBB814bE3'
 }
 
 ```
-npx hardhat --network lachain register-entity --contract-address 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC --entity-address 0x39f76952100495698C5a9a0441DcD14fBB814bE3 --domain "entity2.cvu" --entity-id "00000031" --public-key 0xcc95c03effdb2486c2f59878125840bfce43324452c8ae63a992adeb77b7c9049c81e96b7dc23df9d291c776f9aee699e6655785a593aa3958ed677b0b91c120
+npx hardhat --network lachain register-entity --contract-address 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC --entity-address 0x39f76952100495698C5a9a0441DcD14fBB814bE3 --domain "entity2.cvu" --public-key 0xcc95c03effdb2486c2f59878125840bfce43324452c8ae63a992adeb77b7c9049c81e96b7dc23df9d291c776f9aee699e6655785a593aa3958ed677b0b91c120
 ```
 
 ## Set up entities

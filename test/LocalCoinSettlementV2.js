@@ -103,7 +103,7 @@ describe("Test LocalCoinSettlementV2", function () {
         "uint256",
         "bytes",
         "bytes",
-        "uint224",
+        "uint256",
         "uint256",
       ],
       [
@@ -138,19 +138,15 @@ describe("Test LocalCoinSettlementV2", function () {
       await deployFixture();
 
     // register origin and destination
-    const providerId = "00000031";
     const originDomain = "entity1.cvu";
     const pubKey = "0x" + ent1.publicKey;
-    await lcs
-      .connect(owner)
-      .registerEntity(originDomain, ent1.address, providerId, pubKey);
+    await lcs.connect(owner).registerEntity(originDomain, ent1.address, pubKey);
 
-    const providerId2 = "00001478";
     const destinationDomain = "entity2.cvu";
     const pubKey2 = "0x" + ent2.publicKey;
     await lcs
       .connect(owner)
-      .registerEntity(destinationDomain, ent2.address, providerId2, pubKey2);
+      .registerEntity(destinationDomain, ent2.address, pubKey2);
 
     const tokenAmount = "1";
     const encryptedOrigin = "0x";
@@ -173,7 +169,7 @@ describe("Test LocalCoinSettlementV2", function () {
         "uint256",
         "bytes",
         "bytes",
-        "uint224",
+        "uint256",
         "uint256",
       ],
       [
@@ -233,10 +229,8 @@ describe("Test LocalCoinSettlementV2", function () {
     };
   }
 
-  async function registerEntity(domain, providerId, pubkey, lcs, owner, ent) {
-    return await lcs
-      .connect(owner)
-      .registerEntity(domain, ent.address, providerId, pubkey);
+  async function registerEntity(domain, pubkey, lcs, owner, ent) {
+    return await lcs.connect(owner).registerEntity(domain, ent.address, pubkey);
   }
 
   const ONE_WEEK_IN_SECS = 7 * 24 * 60 * 60;
@@ -245,32 +239,26 @@ describe("Test LocalCoinSettlementV2", function () {
     it("Revert - Only Owner can register a new entity", async function () {
       const { entity1, lcs, ent1 } = await loadFixture(deployFixture);
 
-      const providerId = "00000031";
       const domain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
 
       await expect(
-        lcs
-          .connect(entity1)
-          .registerEntity(domain, ent1.address, providerId, pubKey)
+        lcs.connect(entity1).registerEntity(domain, ent1.address, pubKey)
       ).to.be.revertedWith("Ownable: caller is not the owner");
     });
     it("Should register a new entity", async function () {
       const { owner, ent1, lcs } = await loadFixture(deployFixture);
 
-      const providerId = "00000031";
       const domain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
 
       const domainHash = await lcs.getDomainHash(domain);
 
       await expect(
-        lcs
-          .connect(owner)
-          .registerEntity(domain, ent1.address, providerId, pubKey)
+        lcs.connect(owner).registerEntity(domain, ent1.address, pubKey)
       )
         .to.emit(lcs, "EntityUpdated")
-        .withArgs(domainHash, ent1.address, bn(providerId), domain, pubKey);
+        .withArgs(domainHash, ent1.address, domain, pubKey);
     });
   });
 
@@ -311,11 +299,10 @@ describe("Test LocalCoinSettlementV2", function () {
     });
     it("Revert - Origin entity is disable", async function () {
       const { entity1, lcs, owner, ent1 } = await loadFixture(deployFixture);
-      const providerId = "00000031";
       const domain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
 
-      await registerEntity(domain, providerId, pubKey, lcs, owner, ent1);
+      await registerEntity(domain, pubKey, lcs, owner, ent1);
       await lcs.connect(owner).disableEntity(domain);
 
       await expect(
@@ -335,11 +322,10 @@ describe("Test LocalCoinSettlementV2", function () {
 
     it("Revert - Origin sender should be equal than msg.sender", async function () {
       const { lcs, owner, ent1 } = await loadFixture(deployFixture);
-      const providerId = "00000031";
       const domain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
 
-      await registerEntity(domain, providerId, pubKey, lcs, owner, ent1);
+      await registerEntity(domain, pubKey, lcs, owner, ent1);
 
       await expect(
         lcs
@@ -359,10 +345,9 @@ describe("Test LocalCoinSettlementV2", function () {
     it("Revert - Destination entity not registered", async function () {
       const { lcs, owner, ent1, entity1 } = await loadFixture(deployFixture);
 
-      const providerId = "00000031";
       const domain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
-      await registerEntity(domain, providerId, pubKey, lcs, owner, ent1);
+      await registerEntity(domain, pubKey, lcs, owner, ent1);
 
       await expect(
         lcs
@@ -383,17 +368,15 @@ describe("Test LocalCoinSettlementV2", function () {
       const { entity1, lcs, owner, ent1, ent2 } = await loadFixture(
         deployFixture
       );
-      const providerId = "00000031";
       const domain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
 
-      await registerEntity(domain, providerId, pubKey, lcs, owner, ent1);
+      await registerEntity(domain, pubKey, lcs, owner, ent1);
 
-      const providerId2 = "00001478";
       const domain2 = "entity2.cvu";
       const pubKey2 = "0x" + ent2.publicKey;
 
-      await registerEntity(domain2, providerId2, pubKey2, lcs, owner, ent2);
+      await registerEntity(domain2, pubKey2, lcs, owner, ent2);
       await lcs.connect(owner).disableEntity(domain2);
 
       await expect(
@@ -417,17 +400,15 @@ describe("Test LocalCoinSettlementV2", function () {
       );
 
       // register origin and destination
-      const providerId = "00000031";
       const domain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
 
-      await registerEntity(domain, providerId, pubKey, lcs, owner, ent1);
+      await registerEntity(domain, pubKey, lcs, owner, ent1);
 
-      const providerId2 = "00001478";
       const domain2 = "entity2.cvu";
       const pubKey2 = "0x" + ent2.publicKey;
 
-      await registerEntity(domain2, providerId2, pubKey2, lcs, owner, ent2);
+      await registerEntity(domain2, pubKey2, lcs, owner, ent2);
 
       await expect(
         lcs
@@ -633,19 +614,17 @@ describe("Test LocalCoinSettlementV2", function () {
         await loadFixture(deployFixture);
 
       // register origin and destination
-      const providerId = "00000031";
       const originDomain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
       await lcs
         .connect(owner)
-        .registerEntity(originDomain, ent1.address, providerId, pubKey);
+        .registerEntity(originDomain, ent1.address, pubKey);
 
-      const providerId2 = "00001478";
       const destinationDomain = "entity2.cvu";
       const pubKey2 = "0x" + ent2.publicKey;
       await lcs
         .connect(owner)
-        .registerEntity(destinationDomain, ent2.address, providerId2, pubKey2);
+        .registerEntity(destinationDomain, ent2.address, pubKey2);
 
       const userOrigin = "user_alias_ori";
       const userDest = "user_alias_dest";

@@ -4,7 +4,6 @@ task("register-entity", "Adds a new entity")
   .addParam("contractAddress", "lcs contract address")
   .addParam("domain", "entity domain")
   .addParam("entityAddress", "Address of the entity")
-  .addParam("entityId", "Id of the entity")
   .addParam("publicKey", "entity public key")
   .setAction(async (taskArgs, hre) => {
     let [admin] = await hre.ethers.getSigners();
@@ -19,7 +18,6 @@ task("register-entity", "Adds a new entity")
       .registerEntity(
         taskArgs.domain,
         taskArgs.entityAddress,
-        taskArgs.entityId,
         taskArgs.publicKey
       );
     await newEntityTx.wait(1);
