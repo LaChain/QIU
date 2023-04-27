@@ -2,6 +2,7 @@ const { task } = require("hardhat/config");
 
 task("register-entity", "Adds a new entity")
   .addParam("contractAddress", "lcs contract address")
+  .addParam("domain", "entity domain")
   .addParam("entityAddress", "Address of the entity")
   .addParam("entityId", "Id of the entity")
   .addParam("publicKey", "entity public key")
@@ -16,12 +17,13 @@ task("register-entity", "Adds a new entity")
     const newEntityTx = await lcs
       .connect(admin)
       .registerEntity(
+        taskArgs.domain,
         taskArgs.entityAddress,
         taskArgs.entityId,
         taskArgs.publicKey
       );
     await newEntityTx.wait(1);
-    console.log("new Entity added: ", taskArgs.entityId);
+    console.log("new Entity added: ", taskArgs.domain);
   });
 
 module.exports = {};

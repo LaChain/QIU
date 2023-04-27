@@ -2,11 +2,13 @@ const { task } = require("hardhat/config");
 
 task("transfer-request", "Initiate a transfer request")
   .addParam("contractAddress", "lcs contract address")
-  .addParam("destination", "Address of the destination entity")
+  .addParam("originDomain", "origin domain")
+  .addParam("destinationDomain", "destination domain")
   .addParam("amount", "Amount of the transfer request")
-  .addParam("encryptedCvuOrigin", "encripted cvu of origin")
-  .addParam("encryptedCvuDestination", "encripted cvu of destination")
+  .addParam("encryptedOrigin", "encrypted origin")
+  .addParam("encryptedDestination", "encrypted destination")
   .addParam("expiration", "expiration time of the transfer request")
+  .addParam("externalRef", "external reference")
   .setAction(async (taskArgs, hre) => {
     let [sender] = await hre.ethers.getSigners();
 
@@ -20,10 +22,11 @@ task("transfer-request", "Initiate a transfer request")
     const transferHash = await hre.run("get-transfer-hash", {
       contractAddress: taskArgs.contractAddress,
       sender: sender.address,
-      destination: taskArgs.destination,
+      originDomain: taskArgs.originDomain,
+      destinationDomain: taskArgs.destinationDomain,
       amount: taskArgs.amount,
-      encryptedCvuOrigin: taskArgs.encryptedCvuOrigin,
-      encryptedCvuDestination: taskArgs.encryptedCvuDestination,
+      encryptedOrigin: taskArgs.encryptedOrigin,
+      encryptedDestination: taskArgs.encryptedDestination,
       expiration: taskArgs.expiration,
     });
 
@@ -31,11 +34,13 @@ task("transfer-request", "Initiate a transfer request")
     const transferRequestTx = await lcs
       .connect(sender)
       .transferRequest(
-        taskArgs.destination,
+        taskArgs.originDomain,
+        taskArgs.destinationDomain,
         amount,
-        taskArgs.encryptedCvuOrigin,
-        taskArgs.encryptedCvuDestination,
-        taskArgs.expiration
+        taskArgs.encryptedOrigin,
+        taskArgs.encryptedDestination,
+        taskArgs.expiration,
+        taskArgs.externalRef
       );
     await transferRequestTx.wait(1);
 

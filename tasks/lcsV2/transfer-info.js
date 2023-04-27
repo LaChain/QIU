@@ -10,13 +10,15 @@ task("transfer-info", "Get transfer info")
 
     const transferInfo = await lcs.transfers(taskArgs.transferHash);
     console.log({
-      origin: transferInfo.origin,
-      destination: transferInfo.destination,
+      originDomainHash: transferInfo.originDomainHash,
+      destinationDomainHash: transferInfo.destinationDomainHash,
       amount: transferInfo.amount.toString(),
-      encryptedCvuOrigin: transferInfo.encryptedCvuOrigin,
-      encryptedCvuDestination: transferInfo.encryptedCvuDestination,
+      encryptedOrigin: transferInfo.encryptedOrigin,
+      encryptedDestination: transferInfo.encryptedDestination,
+      nonce: transferInfo.nonce.toString(),
       expiration: transferInfo.expiration.toString(),
       status: transferInfo.status.toString(),
+      externalRef: transferInfo.externalRef,
     });
     return transferInfo;
   });
