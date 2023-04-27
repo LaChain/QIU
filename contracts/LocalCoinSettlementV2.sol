@@ -5,11 +5,16 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract LocalCoinSettlementV2 is Ownable {
+    bytes32[] public entities;
     // Struct to hold information about an entity
-    struct Entity {
+    struct EntityInfo {
+        bytes32 domainHash;
+        address entityAddress;
         uint32 entityId;
         uint224 nonce;
+        string domain;
         bytes publicKey;
+        bool disable;
     }
 
     enum Status {
@@ -18,39 +23,43 @@ contract LocalCoinSettlementV2 is Ownable {
         Cancelled
     }
 
-    mapping(address => Entity) public entities;
+    mapping(bytes32 => EntityInfo) public domainHashToEntity;
 
     // ERC20 token address
     address private tokenAddress;
 
     struct Transfer {
-        address origin;
-        address destination;
+        bytes32 originDomainHash;
+        bytes32 destinationDomainHash;
         uint256 amount;
-        bytes encryptedCvuOrigin;
-        bytes encryptedCvuDestination;
+        bytes encryptedOrigin;
+        bytes encryptedDestination;
         uint256 nonce;
         uint256 expiration;
         Status status;
+        string externalRef;
     }
 
     mapping(bytes32 => Transfer) public transfers;
 
-    event NewEntity(
+    event EntityUpdated(
+        bytes32 indexed domainHash,
         address indexed entityAddress,
-        uint32 indexed entityId,
+        uint32 entityId,
+        string domain,
         bytes publicKey
     );
 
     event NewTransferRequest(
         bytes32 indexed transferHash,
-        address indexed sender,
-        address indexed recipient,
+        bytes32 indexed originDomainHash,
+        bytes32 indexed destinationDomainHash,
         uint256 amount,
-        bytes encryptedCvuOrigin,
-        bytes encryptedCvuDestination,
+        bytes encryptedOrigin,
+        bytes encryptedDestination,
         uint256 nonce,
-        uint256 expiration
+        uint256 expiration,
+        string externalRef
     );
 
     event TransferAccepted(
@@ -69,65 +78,119 @@ contract LocalCoinSettlementV2 is Ownable {
 
     // Register a new entity (only owner)
     function registerEntity(
+        string memory _domain,
         address _entityAddress,
         uint32 _entityId,
         bytes memory _publicKey
     ) public onlyOwner {
-        require(_entityId != 0, "entityId can not be 0");
-        Entity storage entity = entities[_entityAddress];
+        require(bytes(_domain).length > 0, "domain can not be empty");
+        bytes32 domainHash = keccak256(bytes(_domain));
+        EntityInfo storage entity = domainHashToEntity[domainHash];
+
+        require(entity.entityAddress == address(0), "entity already exists");
+
+        entity.domainHash = domainHash;
+        entity.entityAddress = _entityAddress;
         entity.entityId = _entityId;
+        entity.domain = _domain;
         entity.publicKey = _publicKey;
 
-        emit NewEntity(_entityAddress, _entityId, _publicKey);
+        entities.push(domainHash);
+
+        emit EntityUpdated(
+            domainHash,
+            _entityAddress,
+            _entityId,
+            _domain,
+            _publicKey
+        );
+    }
+
+    // Disable an existing entity (only owner)
+    function disableEntity(string memory _domain) external onlyOwner {
+        bytes32 domainHash = getDomainHash(_domain);
+        EntityInfo storage entity = domainHashToEntity[domainHash];
+        require(entity.entityAddress != address(0), "entity does not exist");
+        entity.disable = true;
     }
 
     // Create a new transfer request (sender)
-    // _encrtyptedCvuOrigin and _encrtyptedCvuDestination are encryped with destination public key
+    // _encrtyptedOrigin and _encrtyptedDestination are encryped with destination public key
     function transferRequest(
-        address _destination,
+        string memory _originDomain,
+        string memory _destinationDomain,
         uint256 _amount,
-        bytes memory _encryptedCvuOrigin,
-        bytes memory _encryptedCvuDestination,
-        uint256 _expiration
+        bytes memory _encryptedOrigin,
+        bytes memory _encryptedDestination,
+        uint256 _expiration,
+        string memory _externalRef
     ) external returns (bytes32) {
-        Entity storage originInfo = entities[msg.sender];
+        bytes32 originDomainHash = getDomainHash(_originDomain);
+        bytes32 destinationDomainHash = getDomainHash(_destinationDomain);
 
-        // Check origin is in registry
-        require(originInfo.entityId != 0, "origin entity not registered");
-
-        // Check destination is in registry
-        Entity memory destinationInfo = entities[_destination];
+        // Check that origin and destination are different
         require(
-            destinationInfo.entityId != 0,
-            "destination entity not registered"
+            originDomainHash != destinationDomainHash,
+            "origin and destination are the same"
         );
+
+        EntityInfo storage originInfo = domainHashToEntity[originDomainHash];
+
+        // Check that origin is in registry and enabled, and auhorized to create request
+        requireIsValidEntity(originInfo.entityAddress, originInfo.disable);
+        requireIsAuthorized(originInfo.entityAddress, msg.sender);
+
+        {
+            // Check that destination is in registry and enabled
+            EntityInfo memory destinationInfo = domainHashToEntity[
+                destinationDomainHash
+            ];
+            requireIsValidEntity(
+                destinationInfo.entityAddress,
+                destinationInfo.disable
+            );
+        }
+
+        // Check that amount is greater than 0
+        require(_amount > 0, "amount must be greater than 0");
+
+        // Check that expiration is greater than 0
+        require(_expiration > 0, "expiration must be greater than 0");
 
         // Create transfer request
         bytes32 transferHash = keccak256(
             abi.encodePacked(
                 msg.sender,
-                _destination,
+                originDomainHash,
+                destinationDomainHash,
                 _amount,
-                _encryptedCvuOrigin,
-                _encryptedCvuDestination,
+                _encryptedOrigin,
+                _encryptedDestination,
                 originInfo.nonce,
                 _expiration
             )
         );
-        Transfer storage transfer = transfers[transferHash];
-        require(transfer.origin == address(0), "transfer already created");
+        uint224 transferNonce = originInfo.nonce;
+        {
+            Transfer storage transfer = transfers[transferHash];
 
-        transfer.origin = msg.sender;
-        transfer.destination = _destination;
-        transfer.amount = _amount;
-        transfer.encryptedCvuOrigin = _encryptedCvuOrigin;
-        transfer.encryptedCvuDestination = _encryptedCvuDestination;
-        transfer.nonce = originInfo.nonce;
-        transfer.expiration = block.timestamp + _expiration;
-        transfer.status = Status.Pending;
+            require(
+                transfer.originDomainHash == bytes32(0),
+                "transfer already created"
+            );
 
-        originInfo.nonce += 1;
+            transfer.originDomainHash = originDomainHash;
+            transfer.destinationDomainHash = destinationDomainHash;
+            transfer.amount = _amount;
+            transfer.encryptedOrigin = _encryptedOrigin;
+            transfer.encryptedDestination = _encryptedDestination;
+            transfer.nonce = transferNonce;
+            transfer.expiration = block.timestamp + _expiration;
+            transfer.status = Status.Pending;
+            transfer.externalRef = _externalRef;
 
+            originInfo.nonce += 1;
+        }
         // Transfer the tokens from origin to the contract using SafeERC20
         SafeERC20.safeTransferFrom(
             IERC20(tokenAddress),
@@ -138,13 +201,14 @@ contract LocalCoinSettlementV2 is Ownable {
 
         emit NewTransferRequest(
             transferHash,
-            msg.sender,
-            _destination,
+            originDomainHash,
+            destinationDomainHash,
             _amount,
-            _encryptedCvuOrigin,
-            _encryptedCvuDestination,
-            transfer.nonce,
-            _expiration
+            _encryptedOrigin,
+            _encryptedDestination,
+            transferNonce,
+            _expiration,
+            _externalRef
         );
 
         return transferHash;
@@ -168,8 +232,18 @@ contract LocalCoinSettlementV2 is Ownable {
     function acceptTransfer(bytes32 _transferHash) private {
         Transfer storage transfer = transfers[_transferHash];
 
+        // Check that destination is in registry and enabled
+        EntityInfo memory destinationInfo = domainHashToEntity[
+            transfer.destinationDomainHash
+        ];
+        requireIsValidEntity(
+            destinationInfo.entityAddress,
+            destinationInfo.disable
+        );
+        requireIsAuthorized(destinationInfo.entityAddress, msg.sender);
+
         // Check that destination for transfer is the same as msg.sender
-        require(transfer.destination == msg.sender, "not authorized");
+        require(destinationInfo.entityAddress == msg.sender, "not authorized");
 
         // Check that transfer has not expired
         require(block.timestamp < transfer.expiration, "transfer expired");
@@ -186,19 +260,22 @@ contract LocalCoinSettlementV2 is Ownable {
         // Transfer the tokens to the destination using SafeERC20
         SafeERC20.safeTransfer(
             IERC20(tokenAddress),
-            transfer.destination,
+            destinationInfo.entityAddress,
             transfer.amount
         );
 
-        emit TransferAccepted(_transferHash, transfer.destination);
+        emit TransferAccepted(_transferHash, destinationInfo.entityAddress);
     }
 
     // Cancel a transfer request and get back tokens (sender)
     function cancelTransfer(bytes32 _transferHash) private {
         Transfer storage transfer = transfers[_transferHash];
 
-        // Check sender is the same as origin for transfer
-        require(transfer.origin == msg.sender, "not authorized");
+        EntityInfo memory originInfo = domainHashToEntity[
+            transfer.originDomainHash
+        ];
+        requireIsValidEntity(originInfo.entityAddress, originInfo.disable);
+        requireIsAuthorized(originInfo.entityAddress, msg.sender);
 
         // Check that transfer has expired
         require(block.timestamp >= transfer.expiration, "transfer not expired");
@@ -215,10 +292,57 @@ contract LocalCoinSettlementV2 is Ownable {
         // Transfer the tokens back to the sender using SafeERC20
         SafeERC20.safeTransfer(
             IERC20(tokenAddress),
-            transfer.origin,
+            originInfo.entityAddress,
             transfer.amount
         );
 
-        emit TransferCancelled(_transferHash, transfer.origin);
+        emit TransferCancelled(_transferHash, originInfo.entityAddress);
+    }
+
+    function getAllEntities() public view returns (EntityInfo[] memory) {
+        EntityInfo[] memory allEntities = new EntityInfo[](entities.length);
+
+        for (uint256 i = 0; i < entities.length; i++) {
+            allEntities[i] = domainHashToEntity[entities[i]];
+        }
+        return allEntities;
+    }
+
+    function getEntity(
+        bytes32 domainHash
+    ) public view returns (EntityInfo memory) {
+        return domainHashToEntity[domainHash];
+    }
+
+    function getTransfer(
+        bytes32 transferHash
+    ) public view returns (Transfer memory) {
+        return transfers[transferHash];
+    }
+
+    // function to get domainHash from domain
+    function getDomainHash(
+        string memory _domain
+    ) public pure returns (bytes32) {
+        return keccak256(bytes(_domain));
+    }
+
+    // Function to check if entity is authorized
+    function requireIsAuthorized(
+        address entityAddress,
+        address sender
+    ) private pure {
+        require(entityAddress == sender, "Not authorized");
+    }
+
+    // Function to check if entity is valid (is registered and enabled)
+    function requireIsValidEntity(
+        address entityAddress,
+        bool entityDisable
+    ) private pure {
+        // Require entity to be registered
+        require(entityAddress != address(0), "Entity not registered");
+        // Require entity to be enabled
+        require(!entityDisable, "Entity disabled");
     }
 }
