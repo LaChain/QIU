@@ -27,7 +27,7 @@ async function main() {
   await tERC20.deployed();
   console.log(`ERC20 deployed to ${tERC20.address}`);
 
-  if (hre.network.config.chainId === 5 && hre.config.etherscan.apiKey) {
+  if (hre.config.etherscan.apiKey) {
     console.log("Waiting for block confirmations...");
     await tERC20.deployTransaction.wait(6);
     await verify(tERC20.address, [
@@ -50,7 +50,7 @@ async function main() {
     `LocalCoinSettlementV2 deployed to ${localCoinSettlementV2.address}`
   );
 
-  if (hre.network.config.chainId === 5 && hre.config.etherscan.apiKey) {
+  if (hre.config.etherscan.apiKey) {
     console.log("Waiting for block confirmations...");
     await localCoinSettlementV2.deployTransaction.wait(6);
     await verify(localCoinSettlementV2.address, [tERC20.address]);

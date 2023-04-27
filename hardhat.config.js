@@ -8,6 +8,7 @@ const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
 const LACHAIN_TESTNET_RPC_URL = process.env.LACHAIN_TESTNET_RPC_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY;
+const LACHAIN_EXPLORER_URL = process.env.LACHAIN_EXPLORER_URL;
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -28,7 +29,21 @@ module.exports = {
     },
   },
   etherscan: {
-    apiKey: ETHERSCAN_KEY,
+    apiKey: {
+      //ethereum
+      goerli: ETHERSCAN_KEY,
+      lachain: ETHERSCAN_KEY,
+    },
+    customChains: [
+      {
+        network: "lachain",
+        chainId: 418,
+        urls: {
+          apiURL: LACHAIN_EXPLORER_URL + "/api",
+          browserURL: LACHAIN_EXPLORER_URL,
+        },
+      },
+    ],
   },
   gasReporter: {
     enabled: true,

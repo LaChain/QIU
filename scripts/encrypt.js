@@ -1,36 +1,36 @@
 const hre = require("hardhat");
 const EthCrypto = require("eth-crypto");
 
-const exampleCVU = "0000003100036521571806";
+const exampleData = "0000003100036521571806";
 const privateKey = "";
 
 async function main() {
   const identity = EthCrypto.createIdentity();
 
-  const encryptedCvu = await EthCrypto.encryptWithPublicKey(
+  const encryptedData = await EthCrypto.encryptWithPublicKey(
     identity.publicKey,
-    exampleCVU
+    exampleData
   );
 
-  const encryptedCvuStr = EthCrypto.cipher.stringify(encryptedCvu);
+  const encryptedDataStr = EthCrypto.cipher.stringify(encryptedData);
 
-  const encryptCvu = EthCrypto.cipher.parse(encryptedCvuStr);
+  const encryptData = EthCrypto.cipher.parse(encryptedDataStr);
 
   const decrytedMessage = await EthCrypto.decryptWithPrivateKey(
     identity.privateKey,
-    encryptCvu
+    encryptData
   );
 
   console.log(identity);
-  console.log(encryptedCvu);
-  console.log(encryptedCvuStr);
-  console.log(encryptCvu);
+  console.log(encryptedData);
+  console.log(encryptedDataStr);
+  console.log(encryptData);
   console.log(decrytedMessage);
 
   const publicKey = EthCrypto.publicKeyByPrivateKey(privateKey);
   console.log(publicKey);
-  const eCvu = await EthCrypto.encryptWithPublicKey(publicKey, exampleCVU);
-  const dm = await EthCrypto.decryptWithPrivateKey(privateKey, eCvu);
+  const eData = await EthCrypto.encryptWithPublicKey(publicKey, exampleData);
+  const dm = await EthCrypto.decryptWithPrivateKey(privateKey, eData);
   console.log(dm);
 }
 
