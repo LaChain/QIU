@@ -7,12 +7,6 @@ function bn(x) {
   return ethers.BigNumber.from(x);
 }
 
-// Ripio        00001478
-// Belo	        00001393
-// Bitso	    00000253
-// Mercado Pago	00000031
-// Ualá	        00000079
-
 describe("Test LocalCoinSettlement", function () {
   async function deployFixture() {
     [owner] = await hre.ethers.getSigners();
