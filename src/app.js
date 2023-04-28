@@ -10,6 +10,7 @@ const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const bodyParserErrorHandler = require("express-body-parser-error-handler");
+const { BadRequestError } = require("./errors/commonErrors");
 
 const { default: axios } = require("axios");
 require("express-async-errors");
@@ -36,9 +37,10 @@ app.get("/", (req, res) => {
   res.send("OK");
 });
 
-const routes = [require("./routes/v1/admin")];
+const erc20Routes = [require("./routes/v1/erc20")];
+app.use("/v1/erc20/", erc20Routes);
 
-// set app routes
-app.use("/v1", routes);
+const lcsRoutes = [require("./routes/v1/erc20")];
+app.use("/v1/lcs/", lcsRoutes);
 
 module.exports = app;
