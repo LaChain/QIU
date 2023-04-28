@@ -5,7 +5,8 @@ task("erc20-mint", "Mint tokens on an ERC20 mintable contract")
   .addParam("account", "Account to mint")
   .addParam("amount", "Amount to mint")
   .setAction(async (taskArgs, hre) => {
-    let [admin] = await hre.ethers.getSigners();
+    await hre.setup();
+    const sender = hre.network.config.sender;
 
     const tERC20 = (await hre.ethers.getContractFactory("MockERC20")).attach(
       taskArgs.erc20Address
@@ -13,12 +14,13 @@ task("erc20-mint", "Mint tokens on an ERC20 mintable contract")
 
     console.log("Mint...");
     const mintTx = await tERC20
-      .connect(admin)
+      .connect(sender)
       .mint(taskArgs.account, taskArgs.amount);
     await mintTx.wait(1);
     console.log(
       `Mint account: ${taskArgs.account} , amount: ${taskArgs.amount}`
     );
+    return mintTx;
   });
 
 module.exports = {};
