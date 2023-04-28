@@ -40,7 +40,7 @@ app.get("/", (req, res) => {
 const erc20Routes = [require("./routes/v1/erc20")];
 app.use("/v1/erc20/", erc20Routes);
 
-const lcsRoutes = [require("./routes/v1/erc20")];
+const lcsRoutes = [require("./routes/v1/lcs")];
 app.use("/v1/lcs/", lcsRoutes);
 
 module.exports = app;

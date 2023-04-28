@@ -10,13 +10,12 @@ task("transfer-request", "Initiate a transfer request")
   .addParam("expiration", "expiration time of the transfer request")
   .addParam("externalRef", "external reference")
   .setAction(async (taskArgs, hre) => {
-    let [sender] = await hre.ethers.getSigners();
+    await hre.setup();
+    const sender = hre.network.config.sender;
 
     const lcs = (
       await hre.ethers.getContractFactory("LocalCoinSettlementV2")
     ).attach(taskArgs.contractAddress);
-
-    const amount = hre.ethers.utils.parseEther(taskArgs.amount);
 
     // get transfer hash
     const transferHash = await hre.run("get-transfer-hash", {
@@ -36,7 +35,7 @@ task("transfer-request", "Initiate a transfer request")
       .transferRequest(
         taskArgs.originDomain,
         taskArgs.destinationDomain,
-        amount,
+        taskArgs.amount,
         taskArgs.encryptedOrigin,
         taskArgs.encryptedDestination,
         taskArgs.expiration,
@@ -45,6 +44,7 @@ task("transfer-request", "Initiate a transfer request")
     await transferRequestTx.wait(1);
 
     console.log(`Transfer request submitted!`);
+    return { transferRequestTx, transferHash };
   });
 
 module.exports = {};

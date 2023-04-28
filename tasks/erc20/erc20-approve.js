@@ -5,7 +5,8 @@ task("erc20-approve", "Approve tokens for transfer")
   .addParam("spender", "Spender/Recipient account")
   .addParam("amount", "Amount to mint")
   .setAction(async (taskArgs, hre) => {
-    let [sender] = await hre.ethers.getSigners();
+    await hre.setup();
+    const sender = hre.network.config.sender;
 
     const tERC20 = (await hre.ethers.getContractFactory("MockERC20")).attach(
       taskArgs.erc20Address

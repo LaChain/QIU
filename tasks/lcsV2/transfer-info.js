@@ -9,7 +9,7 @@ task("transfer-info", "Get transfer info")
     ).attach(taskArgs.contractAddress);
 
     const transferInfo = await lcs.transfers(taskArgs.transferHash);
-    console.log({
+    const transferData = {
       originDomainHash: transferInfo.originDomainHash,
       destinationDomainHash: transferInfo.destinationDomainHash,
       amount: transferInfo.amount.toString(),
@@ -19,8 +19,9 @@ task("transfer-info", "Get transfer info")
       expiration: transferInfo.expiration.toString(),
       status: transferInfo.status.toString(),
       externalRef: transferInfo.externalRef,
-    });
-    return transferInfo;
+    };
+    console.log(transferData);
+    return transferData;
   });
 
 module.exports = {};

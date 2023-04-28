@@ -18,7 +18,7 @@ task("get-transfer-hash", "Get transfer hash")
       taskArgs.destinationDomain
     );
     const entityOrigin = await lcs.domainHashToEntity(originDomainHash);
-    const amount = hre.ethers.utils.parseEther(taskArgs.amount);
+    // const amount = hre.ethers.utils.parseEther(taskArgs.amount);
 
     const transferHash = ethers.utils.solidityKeccak256(
       [
@@ -35,7 +35,7 @@ task("get-transfer-hash", "Get transfer hash")
         entityOrigin.entityAddress,
         originDomainHash,
         destinationDomainHash,
-        amount,
+        taskArgs.amount,
         taskArgs.encryptedOrigin,
         taskArgs.encryptedDestination,
         entityOrigin.nonce,
