@@ -19,7 +19,7 @@ task("erc20-transfer", "Transfer tokens from one account to another")
       .transfer(taskArgs.to, taskArgs.amount);
     await transferTx.wait(1);
     console.log(
-      `Transfer from: ${sender.address} , to: ${taskArgs.to} , amount: ${amount}`
+      `Transfer from: ${sender.address} , to: ${taskArgs.to} , amount: ${taskArgs.amount}`
     );
     return transferTx;
   });

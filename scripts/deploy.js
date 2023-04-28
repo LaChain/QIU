@@ -31,8 +31,8 @@ async function main() {
     console.log("Waiting for block confirmations...");
     await tERC20.deployTransaction.wait(6);
     await verify(tERC20.address, [
-      "Num Ars",
-      "NARS",
+      "Test Num Ars",
+      "TNARS",
       owner.address,
       initialBalance,
     ]);

@@ -5,15 +5,15 @@
 Example:
 
 ```
-ERC20: 0x3b9d9e6c956f2885a272ca1da2aa63bf59bdf939
-LocalCoinSettlementV2: 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC
+ERC20: 0x8Cf5f77ddec2D73276C0C810ab3aD7B29be52409
+LocalCoinSettlementV2: 0xE0506a00C036C2c05Fc0b3D9BAb530CC81AB502B
 ```
 
 ## Setup env vars
 
 ```
 LACHAIN_TESTNET_RPC_URL=https://rpc.testnet.lachain.network
-PRIVATE_KEY=dfba...
+PRIVATE_KEYS=dfba...,0x7e...,0xe42..
 ```
 
 The PRIVATE_KEY env has to be set to the sender of the transaction.
