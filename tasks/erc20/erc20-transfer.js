@@ -5,21 +5,23 @@ task("erc20-transfer", "Transfer tokens from one account to another")
   .addParam("to", "to account")
   .addParam("amount", "Amount to transfer")
   .setAction(async (taskArgs, hre) => {
-    let [sender] = await hre.ethers.getSigners();
+    await hre.setup();
+    const sender = hre.network.config.sender;
 
     const tERC20 = (await hre.ethers.getContractFactory("MockERC20")).attach(
       taskArgs.erc20Address
     );
-    const amount = hre.ethers.utils.parseEther(taskArgs.amount);
+    // const amount = hre.ethers.utils.parseEther(taskArgs.amount);
 
     console.log("Transfer...");
     const transferTx = await tERC20
       .connect(sender)
-      .transfer(taskArgs.to, amount);
+      .transfer(taskArgs.to, taskArgs.amount);
     await transferTx.wait(1);
     console.log(
-      `Transfer from: ${sender.address} , to: ${taskArgs.to} , amount: ${amount}`
+      `Transfer from: ${sender.address} , to: ${taskArgs.to} , amount: ${taskArgs.amount}`
     );
+    return transferTx;
   });
 
 module.exports = {};

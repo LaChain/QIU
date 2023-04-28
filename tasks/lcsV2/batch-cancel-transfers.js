@@ -4,7 +4,8 @@ task("batch-cancel-transfers", "Cancels a batch of transfer requests")
   .addParam("contractAddress", "lcs contract address")
   .addVariadicPositionalParam("transferHashes", "Array of transfer hashes")
   .setAction(async (taskArgs, hre) => {
-    let [sender] = await hre.ethers.getSigners();
+    await hre.setup();
+    const sender = hre.network.config.sender;
 
     const lcs = (
       await hre.ethers.getContractFactory("LocalCoinSettlementV2")
@@ -17,6 +18,7 @@ task("batch-cancel-transfers", "Cancels a batch of transfer requests")
     await batchCancelTransfersTx.wait(1);
 
     console.log(`Batch transfers canceled: ${taskArgs.transferHashes}`);
+    return batchCancelTransfersTx;
   });
 
 module.exports = {};
