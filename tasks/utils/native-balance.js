@@ -6,6 +6,7 @@ task("native-balance", "Balance native currency of address")
     const balance = await hre.ethers.provider.getBalance(taskArgs.address);
 
     console.log(`Native Balance: ${balance} of address: ${taskArgs.address}`);
+    return balance.toString();
   });
 
 module.exports = {};

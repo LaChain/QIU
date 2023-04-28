@@ -43,4 +43,7 @@ app.use("/v1/erc20/", erc20Routes);
 const lcsRoutes = [require("./routes/v1/lcs")];
 app.use("/v1/lcs/", lcsRoutes);
 
+const routes = [require("./routes/v1/helpers")];
+app.use("/v1/", routes);
+
 module.exports = app;
