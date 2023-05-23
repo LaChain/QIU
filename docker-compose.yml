@@ -1,11 +1,11 @@
 version: "3"
 
 services:
-  lcs-app:
-    image: lcs-app
+  qiu-app:
+    image: qiu-app
     build: .
     ports:
-      - "8080:8080"
+      - "3000:3000"
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules

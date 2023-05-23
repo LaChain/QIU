@@ -1,4 +1,4 @@
-# LCS flow example (network: LAchain)
+# Qiu flow example (network: LAchain)
 
 ### Deployed Contracts
 
@@ -6,7 +6,7 @@ Example:
 
 ```
 ERC20: 0x8Cf5f77ddec2D73276C0C810ab3aD7B29be52409
-LocalCoinSettlementV2: 0xE0506a00C036C2c05Fc0b3D9BAb530CC81AB502B
+Qiu: 0xE0506a00C036C2c05Fc0b3D9BAb530CC81AB502B
 ```
 
 ## Setup env vars
@@ -89,7 +89,7 @@ userDestination = "user_destination";
 
 how to encrypt data in helper section.
 
-### Approve tokens to lcs contract (sender: entity 1)
+### Approve tokens to qiu contract (sender: entity 1)
 
 ```
 npx hardhat --network lachain erc20-approve --erc20-address 0x3b9d9e6c956f2885a272ca1da2aa63bf59bdf939 --spender 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC --amount 100

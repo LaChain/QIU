@@ -1,7 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv-defaults").config();
 require("./tasks/erc20/erc20-tasks");
-require("./tasks/lcsV2/lcsV2-tasks");
+require("./tasks/qiu/qiu-tasks");
 require("./tasks/utils/utils-tasks");
 const { main: setup } = require("./setup");
 const { extendEnvironment } = require("hardhat/config");
@@ -53,7 +53,7 @@ module.exports = {
     ],
   },
   gasReporter: {
-    enabled: true,
+    enabled: false,
   },
   solidity: {
     version: "0.8.9",

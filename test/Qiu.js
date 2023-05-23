@@ -10,7 +10,7 @@ function bn(x) {
   return ethers.BigNumber.from(x);
 }
 
-describe("Test LocalCoinSettlementV2", function () {
+describe("Test Qiu", function () {
   async function deployFixture() {
     [owner] = await hre.ethers.getSigners();
 
@@ -47,13 +47,9 @@ describe("Test LocalCoinSettlementV2", function () {
     );
     await tERC20.deployed();
 
-    const LocalCoinSettlementV2 = await hre.ethers.getContractFactory(
-      "LocalCoinSettlementV2"
-    );
-    const lcs = await LocalCoinSettlementV2.connect(owner).deploy(
-      tERC20.address
-    );
-    await lcs.deployed();
+    const Qiu = await hre.ethers.getContractFactory("Qiu");
+    const qiu = await Qiu.connect(owner).deploy(tERC20.address);
+    await qiu.deployed();
     await tERC20
       .connect(owner)
       .transfer(ent1.address, ethers.utils.parseEther("1"));
@@ -73,13 +69,13 @@ describe("Test LocalCoinSettlementV2", function () {
       entity2,
       entity3,
       tERC20,
-      lcs,
+      qiu,
     };
   }
 
   async function newTransferRequest(
     tERC20,
-    lcs,
+    qiu,
     entityOrigin,
     originDomain,
     destinationDomain,
@@ -90,10 +86,10 @@ describe("Test LocalCoinSettlementV2", function () {
     externalReference
   ) {
     // approve tokens
-    await tERC20.connect(entityOrigin).approve(lcs.address, tokenAmount);
-    const originDomainHash = await lcs.getDomainHash(originDomain);
-    const destinationDomainHash = await lcs.getDomainHash(destinationDomain);
-    const entityInfo = await lcs.domainHashToEntity(originDomainHash);
+    await tERC20.connect(entityOrigin).approve(qiu.address, tokenAmount);
+    const originDomainHash = await qiu.getDomainHash(originDomain);
+    const destinationDomainHash = await qiu.getDomainHash(destinationDomain);
+    const entityInfo = await qiu.domainHashToEntity(originDomainHash);
 
     const transferHash = ethers.utils.solidityKeccak256(
       [
@@ -118,7 +114,7 @@ describe("Test LocalCoinSettlementV2", function () {
       ]
     );
 
-    await lcs
+    await qiu
       .connect(entityOrigin)
       .transferRequest(
         originDomain,
@@ -134,17 +130,17 @@ describe("Test LocalCoinSettlementV2", function () {
   }
 
   async function deployFixtureAndTransferRequest() {
-    const { owner, ent1, ent2, ent3, entity1, entity2, entity3, tERC20, lcs } =
+    const { owner, ent1, ent2, ent3, entity1, entity2, entity3, tERC20, qiu } =
       await deployFixture();
 
     // register origin and destination
     const originDomain = "entity1.cvu";
     const pubKey = "0x" + ent1.publicKey;
-    await lcs.connect(owner).registerEntity(originDomain, ent1.address, pubKey);
+    await qiu.connect(owner).registerEntity(originDomain, ent1.address, pubKey);
 
     const destinationDomain = "entity2.cvu";
     const pubKey2 = "0x" + ent2.publicKey;
-    await lcs
+    await qiu
       .connect(owner)
       .registerEntity(destinationDomain, ent2.address, pubKey2);
 
@@ -154,12 +150,12 @@ describe("Test LocalCoinSettlementV2", function () {
     const expiryTime = (await time.latest()) + ONE_WEEK_IN_SECS + 1;
     const externalReference = "0x";
     // approve tokens
-    await tERC20.connect(entity1).approve(lcs.address, tokenAmount);
+    await tERC20.connect(entity1).approve(qiu.address, tokenAmount);
 
-    const originDomainHash = await lcs.getDomainHash(originDomain);
-    const destinationDomainHash = await lcs.getDomainHash(destinationDomain);
+    const originDomainHash = await qiu.getDomainHash(originDomain);
+    const destinationDomainHash = await qiu.getDomainHash(destinationDomain);
 
-    const entity1Info = await lcs.domainHashToEntity(originDomainHash);
+    const entity1Info = await qiu.domainHashToEntity(originDomainHash);
 
     const transferHash = ethers.utils.solidityKeccak256(
       [
@@ -184,7 +180,7 @@ describe("Test LocalCoinSettlementV2", function () {
       ]
     );
     await expect(
-      lcs
+      qiu
         .connect(entity1)
         .transferRequest(
           originDomain,
@@ -196,7 +192,7 @@ describe("Test LocalCoinSettlementV2", function () {
           externalReference
         )
     )
-      .to.emit(lcs, "NewTransferRequest")
+      .to.emit(qiu, "NewTransferRequest")
       .withArgs(
         transferHash,
         originDomainHash,
@@ -216,7 +212,7 @@ describe("Test LocalCoinSettlementV2", function () {
       entity1,
       entity2,
       entity3,
-      lcs,
+      qiu,
       tERC20,
       originDomain,
       destinationDomain,
@@ -229,45 +225,45 @@ describe("Test LocalCoinSettlementV2", function () {
     };
   }
 
-  async function registerEntity(domain, pubkey, lcs, owner, ent) {
-    return await lcs.connect(owner).registerEntity(domain, ent.address, pubkey);
+  async function registerEntity(domain, pubkey, qiu, owner, ent) {
+    return await qiu.connect(owner).registerEntity(domain, ent.address, pubkey);
   }
 
   const ONE_WEEK_IN_SECS = 7 * 24 * 60 * 60;
 
   describe("Test register entity", function () {
     it("Revert - Only Owner can register a new entity", async function () {
-      const { entity1, lcs, ent1 } = await loadFixture(deployFixture);
+      const { entity1, qiu, ent1 } = await loadFixture(deployFixture);
 
       const domain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
 
       await expect(
-        lcs.connect(entity1).registerEntity(domain, ent1.address, pubKey)
+        qiu.connect(entity1).registerEntity(domain, ent1.address, pubKey)
       ).to.be.revertedWith("Ownable: caller is not the owner");
     });
     it("Should register a new entity", async function () {
-      const { owner, ent1, lcs } = await loadFixture(deployFixture);
+      const { owner, ent1, qiu } = await loadFixture(deployFixture);
 
       const domain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
 
-      const domainHash = await lcs.getDomainHash(domain);
+      const domainHash = await qiu.getDomainHash(domain);
 
       await expect(
-        lcs.connect(owner).registerEntity(domain, ent1.address, pubKey)
+        qiu.connect(owner).registerEntity(domain, ent1.address, pubKey)
       )
-        .to.emit(lcs, "EntityUpdated")
+        .to.emit(qiu, "EntityUpdated")
         .withArgs(domainHash, ent1.address, domain, pubKey);
     });
   });
 
   describe("Test new transfer request", function () {
     it("Revert - Origin domain and destination de same are equal", async function () {
-      const { entity1, lcs } = await loadFixture(deployFixture);
+      const { entity1, qiu } = await loadFixture(deployFixture);
 
       await expect(
-        lcs
+        qiu
           .connect(entity1)
           .transferRequest(
             "entity1.cvu",
@@ -281,10 +277,10 @@ describe("Test LocalCoinSettlementV2", function () {
       ).to.be.revertedWith("origin and destination are the same");
     });
     it("Revert - Origin entity not registered", async function () {
-      const { entity1, lcs } = await loadFixture(deployFixture);
+      const { entity1, qiu } = await loadFixture(deployFixture);
 
       await expect(
-        lcs
+        qiu
           .connect(entity1)
           .transferRequest(
             "entity1.cvu",
@@ -298,15 +294,15 @@ describe("Test LocalCoinSettlementV2", function () {
       ).to.be.revertedWith("Entity not registered");
     });
     it("Revert - Origin entity is disable", async function () {
-      const { entity1, lcs, owner, ent1 } = await loadFixture(deployFixture);
+      const { entity1, qiu, owner, ent1 } = await loadFixture(deployFixture);
       const domain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
 
-      await registerEntity(domain, pubKey, lcs, owner, ent1);
-      await lcs.connect(owner).disableEntity(domain);
+      await registerEntity(domain, pubKey, qiu, owner, ent1);
+      await qiu.connect(owner).disableEntity(domain);
 
       await expect(
-        lcs
+        qiu
           .connect(entity1)
           .transferRequest(
             domain,
@@ -321,14 +317,14 @@ describe("Test LocalCoinSettlementV2", function () {
     });
 
     it("Revert - Origin sender should be equal than msg.sender", async function () {
-      const { lcs, owner, ent1 } = await loadFixture(deployFixture);
+      const { qiu, owner, ent1 } = await loadFixture(deployFixture);
       const domain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
 
-      await registerEntity(domain, pubKey, lcs, owner, ent1);
+      await registerEntity(domain, pubKey, qiu, owner, ent1);
 
       await expect(
-        lcs
+        qiu
           .connect(owner)
           .transferRequest(
             domain,
@@ -343,14 +339,14 @@ describe("Test LocalCoinSettlementV2", function () {
     });
 
     it("Revert - Destination entity not registered", async function () {
-      const { lcs, owner, ent1, entity1 } = await loadFixture(deployFixture);
+      const { qiu, owner, ent1, entity1 } = await loadFixture(deployFixture);
 
       const domain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
-      await registerEntity(domain, pubKey, lcs, owner, ent1);
+      await registerEntity(domain, pubKey, qiu, owner, ent1);
 
       await expect(
-        lcs
+        qiu
           .connect(entity1)
           .transferRequest(
             "entity1.cvu",
@@ -365,22 +361,22 @@ describe("Test LocalCoinSettlementV2", function () {
     });
 
     it("Revert - Destination entity is disable", async function () {
-      const { entity1, lcs, owner, ent1, ent2 } = await loadFixture(
+      const { entity1, qiu, owner, ent1, ent2 } = await loadFixture(
         deployFixture
       );
       const domain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
 
-      await registerEntity(domain, pubKey, lcs, owner, ent1);
+      await registerEntity(domain, pubKey, qiu, owner, ent1);
 
       const domain2 = "entity2.cvu";
       const pubKey2 = "0x" + ent2.publicKey;
 
-      await registerEntity(domain2, pubKey2, lcs, owner, ent2);
-      await lcs.connect(owner).disableEntity(domain2);
+      await registerEntity(domain2, pubKey2, qiu, owner, ent2);
+      await qiu.connect(owner).disableEntity(domain2);
 
       await expect(
-        lcs
+        qiu
           .connect(entity1)
           .transferRequest(
             domain,
@@ -395,7 +391,7 @@ describe("Test LocalCoinSettlementV2", function () {
     });
 
     it("Revert - Not enought allowance to transfer", async function () {
-      const { owner, entity1, ent1, ent2, lcs } = await loadFixture(
+      const { owner, entity1, ent1, ent2, qiu } = await loadFixture(
         deployFixture
       );
 
@@ -403,15 +399,15 @@ describe("Test LocalCoinSettlementV2", function () {
       const domain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
 
-      await registerEntity(domain, pubKey, lcs, owner, ent1);
+      await registerEntity(domain, pubKey, qiu, owner, ent1);
 
       const domain2 = "entity2.cvu";
       const pubKey2 = "0x" + ent2.publicKey;
 
-      await registerEntity(domain2, pubKey2, lcs, owner, ent2);
+      await registerEntity(domain2, pubKey2, qiu, owner, ent2);
 
       await expect(
-        lcs
+        qiu
           .connect(entity1)
           .transferRequest(
             domain,
@@ -425,64 +421,64 @@ describe("Test LocalCoinSettlementV2", function () {
       ).to.be.revertedWith("ERC20: insufficient allowance");
     });
     it("should transfer tokens from ent1 to contract and emit transferRequest event", async function () {
-      const { lcs, tERC20, tokenAmount, transferHash, originDomain } =
+      const { qiu, tERC20, tokenAmount, transferHash, originDomain } =
         await loadFixture(deployFixtureAndTransferRequest);
 
-      const entity1InfoAfter = await lcs.domainHashToEntity(
-        await lcs.getDomainHash(originDomain)
+      const entity1InfoAfter = await qiu.domainHashToEntity(
+        await qiu.getDomainHash(originDomain)
       );
       assert.equal(entity1InfoAfter.nonce, 1);
-      assert.equal(await tERC20.balanceOf(lcs.address), tokenAmount);
-      const transferInfo = await lcs.transfers(transferHash);
+      assert.equal(await tERC20.balanceOf(qiu.address), tokenAmount);
+      const transferInfo = await qiu.transfers(transferHash);
       assert.equal(transferInfo.status, 0);
     });
   });
 
   describe("Test batchAcceptTransfer function", function () {
     it("should fail if destination for transfer is not the same as msg.sender", async function () {
-      const { entity1, transferHash, lcs } = await loadFixture(
+      const { entity1, transferHash, qiu } = await loadFixture(
         deployFixtureAndTransferRequest
       );
 
       await expect(
-        lcs.connect(entity1).batchAcceptTransfer([transferHash])
+        qiu.connect(entity1).batchAcceptTransfer([transferHash])
       ).to.be.revertedWith("Not authorized");
     });
     it("should fail if transfer request is expired", async function () {
-      const { entity2, transferHash, lcs, expiryTime } = await loadFixture(
+      const { entity2, transferHash, qiu, expiryTime } = await loadFixture(
         deployFixtureAndTransferRequest
       );
 
       await time.increaseTo(expiryTime);
 
       await expect(
-        lcs.connect(entity2).batchAcceptTransfer([transferHash])
+        qiu.connect(entity2).batchAcceptTransfer([transferHash])
       ).to.be.revertedWith("transfer expired");
     });
     it("should fail if transfer status is not pending", async function () {
-      const { entity2, transferHash, lcs } = await loadFixture(
+      const { entity2, transferHash, qiu } = await loadFixture(
         deployFixtureAndTransferRequest
       );
 
-      await lcs.connect(entity2).batchAcceptTransfer([transferHash]);
+      await qiu.connect(entity2).batchAcceptTransfer([transferHash]);
 
       await expect(
-        lcs.connect(entity2).batchAcceptTransfer([transferHash])
+        qiu.connect(entity2).batchAcceptTransfer([transferHash])
       ).to.be.revertedWith("transfer already completed or cancelled");
     });
     it("should batchAcceptTransfer sucessfully and emit event", async function () {
-      const { entity2, ent2, transferHash, lcs, tERC20, tokenAmount } =
+      const { entity2, ent2, transferHash, qiu, tERC20, tokenAmount } =
         await loadFixture(deployFixtureAndTransferRequest);
 
       const balanceBefore = await tERC20.balanceOf(ent2.address);
 
-      await expect(lcs.connect(entity2).batchAcceptTransfer([transferHash]))
-        .to.emit(lcs, "TransferAccepted")
+      await expect(qiu.connect(entity2).batchAcceptTransfer([transferHash]))
+        .to.emit(qiu, "TransferAccepted")
         .withArgs(transferHash, ent2.address);
 
       const balanceAfter = await tERC20.balanceOf(ent2.address);
       expect(bn(balanceBefore).add(tokenAmount), balanceAfter).to.be.equal;
-      const transferInfo = await lcs.transfers(transferHash);
+      const transferInfo = await qiu.transfers(transferHash);
       assert.equal(transferInfo.status, 1);
     });
     it("should batchAcceptTransfer sucessfully many transfers", async function () {
@@ -491,7 +487,7 @@ describe("Test LocalCoinSettlementV2", function () {
         entity2,
         ent2,
         transferHash,
-        lcs,
+        qiu,
         tERC20,
         tokenAmount,
         originDomain,
@@ -502,7 +498,7 @@ describe("Test LocalCoinSettlementV2", function () {
 
       const transferHash2 = await newTransferRequest(
         tERC20,
-        lcs,
+        qiu,
         entity1,
         originDomain,
         destinationDomain,
@@ -512,68 +508,68 @@ describe("Test LocalCoinSettlementV2", function () {
         ONE_WEEK_IN_SECS,
         "0x"
       );
-      await await lcs
+      await await qiu
         .connect(entity2)
         .batchAcceptTransfer([transferHash, transferHash2]);
 
       const balanceAfter = await tERC20.balanceOf(ent2.address);
       expect(bn(balanceBefore).add(tokenAmount * 2), balanceAfter).to.be.equal;
-      const transferInfo1 = await lcs.transfers(transferHash);
+      const transferInfo1 = await qiu.transfers(transferHash);
       assert.equal(transferInfo1.status, 1);
-      const transferInfo2 = await lcs.transfers(transferHash2);
+      const transferInfo2 = await qiu.transfers(transferHash2);
       assert.equal(transferInfo2.status, 1);
     });
   });
 
   describe("Test batchCancelTransfer function", function () {
     it("should fail if sender is not the same as origin for transfer", async function () {
-      const { entity2, transferHash, lcs } = await loadFixture(
+      const { entity2, transferHash, qiu } = await loadFixture(
         deployFixtureAndTransferRequest
       );
 
       await expect(
-        lcs.connect(entity2).batchCancelTransfer([transferHash])
+        qiu.connect(entity2).batchCancelTransfer([transferHash])
       ).to.be.revertedWith("Not authorized");
     });
     it("should fail if origin tries to batchCancelTransfer before it expires", async function () {
-      const { entity1, transferHash, lcs } = await loadFixture(
+      const { entity1, transferHash, qiu } = await loadFixture(
         deployFixtureAndTransferRequest
       );
 
       await expect(
-        lcs.connect(entity1).batchCancelTransfer([transferHash])
+        qiu.connect(entity1).batchCancelTransfer([transferHash])
       ).to.be.revertedWith("transfer not expired");
     });
     it("should fail if transfer is not status pending", async function () {
-      const { entity1, entity2, transferHash, lcs, expiryTime } =
+      const { entity1, entity2, transferHash, qiu, expiryTime } =
         await loadFixture(deployFixtureAndTransferRequest);
 
-      await lcs.connect(entity2).batchAcceptTransfer([transferHash]);
+      await qiu.connect(entity2).batchAcceptTransfer([transferHash]);
       await time.increaseTo(expiryTime);
 
       await expect(
-        lcs.connect(entity1).batchCancelTransfer([transferHash])
+        qiu.connect(entity1).batchCancelTransfer([transferHash])
       ).to.be.revertedWith("transfer already completed or cancelled");
     });
     it("origin should be able to batchCancelTransfer after it expires", async function () {
-      const { entity1, ent1, transferHash, lcs, expiryTime, tERC20 } =
+      const { entity1, ent1, transferHash, qiu, expiryTime, tERC20 } =
         await loadFixture(deployFixtureAndTransferRequest);
 
       await time.increaseTo(expiryTime);
 
-      await expect(lcs.connect(entity1).batchCancelTransfer([transferHash]))
-        .to.emit(lcs, "TransferCancelled")
+      await expect(qiu.connect(entity1).batchCancelTransfer([transferHash]))
+        .to.emit(qiu, "TransferCancelled")
         .withArgs(transferHash, ent1.address);
 
-      assert.equal(await tERC20.balanceOf(lcs.address), 0);
-      const transferInfo = await lcs.transfers(transferHash);
+      assert.equal(await tERC20.balanceOf(qiu.address), 0);
+      const transferInfo = await qiu.transfers(transferHash);
       assert.equal(transferInfo.status, 2);
     });
     it("should batch cancel many transfers after it expires", async function () {
       const {
         entity1,
         transferHash,
-        lcs,
+        qiu,
         tERC20,
         tokenAmount,
         originDomain,
@@ -582,7 +578,7 @@ describe("Test LocalCoinSettlementV2", function () {
 
       const transferHash2 = await newTransferRequest(
         tERC20,
-        lcs,
+        qiu,
         entity1,
         originDomain,
         destinationDomain,
@@ -593,16 +589,16 @@ describe("Test LocalCoinSettlementV2", function () {
         "0x"
       );
 
-      const transferInfo2before = await lcs.transfers(transferHash2);
+      const transferInfo2before = await qiu.transfers(transferHash2);
       await time.increaseTo(bn(transferInfo2before.expiration).add(1));
 
-      await lcs
+      await qiu
         .connect(entity1)
         .batchCancelTransfer([transferHash, transferHash2]);
 
-      assert.equal(await tERC20.balanceOf(lcs.address), 0);
-      const transferInfo1 = await lcs.transfers(transferHash);
-      const transferInfo2 = await lcs.transfers(transferHash);
+      assert.equal(await tERC20.balanceOf(qiu.address), 0);
+      const transferInfo1 = await qiu.transfers(transferHash);
+      const transferInfo2 = await qiu.transfers(transferHash);
       assert.equal(transferInfo1.status, 2);
       assert.equal(transferInfo2.status, 2);
     });
@@ -610,19 +606,19 @@ describe("Test LocalCoinSettlementV2", function () {
 
   describe("e2e - Transfer and accept using encryptation", function () {
     it("Should use alias for transfers", async function () {
-      const { owner, ent1, ent2, entity1, entity2, tERC20, lcs } =
+      const { owner, ent1, ent2, entity1, entity2, tERC20, qiu } =
         await loadFixture(deployFixture);
 
       // register origin and destination
       const originDomain = "entity1.cvu";
       const pubKey = "0x" + ent1.publicKey;
-      await lcs
+      await qiu
         .connect(owner)
         .registerEntity(originDomain, ent1.address, pubKey);
 
       const destinationDomain = "entity2.cvu";
       const pubKey2 = "0x" + ent2.publicKey;
-      await lcs
+      await qiu
         .connect(owner)
         .registerEntity(destinationDomain, ent2.address, pubKey2);
 
@@ -640,7 +636,7 @@ describe("Test LocalCoinSettlementV2", function () {
 
       const transferHash = await newTransferRequest(
         tERC20,
-        lcs,
+        qiu,
         entity1,
         originDomain,
         destinationDomain,
@@ -651,7 +647,7 @@ describe("Test LocalCoinSettlementV2", function () {
         externalReference
       );
       const balanceBefore = await tERC20.balanceOf(entity2.address);
-      await lcs.connect(entity2).batchAcceptTransfer([transferHash]);
+      await qiu.connect(entity2).batchAcceptTransfer([transferHash]);
 
       const balanceAfter = await tERC20.balanceOf(entity2.address);
       expect(bn(balanceBefore).add(tokenAmount), balanceAfter).to.be.equal;

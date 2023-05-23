@@ -4,7 +4,7 @@ module.exports = {
   registerEntity: asyncHandler(async (req, res, next) => {
     try {
       const body = req.body;
-      const contractAddress = req.headers["lcs-address"];
+      const contractAddress = req.headers["qiu-address"];
 
       // Execute the Hardhat task
       const { run } = require("hardhat");
@@ -29,7 +29,7 @@ module.exports = {
   createTransferRequest: asyncHandler(async (req, res) => {
     try {
       const body = req.body;
-      const contractAddress = req.headers["lcs-address"];
+      const contractAddress = req.headers["qiu-address"];
 
       // Execute the Hardhat task
       const { run } = require("hardhat");
@@ -61,7 +61,7 @@ module.exports = {
   batchAcceptTransfers: asyncHandler(async (req, res) => {
     try {
       const body = req.body;
-      const contractAddress = req.headers["lcs-address"];
+      const contractAddress = req.headers["qiu-address"];
 
       // Execute the Hardhat task
       const { run } = require("hardhat");
@@ -83,7 +83,7 @@ module.exports = {
   batchCancelTransfers: asyncHandler(async (req, res) => {
     try {
       const body = req.body;
-      const contractAddress = req.headers["lcs-address"];
+      const contractAddress = req.headers["qiu-address"];
 
       // Execute the Hardhat task
       const { run } = require("hardhat");
@@ -106,7 +106,7 @@ module.exports = {
   // get all entities
   getAllEntities: asyncHandler(async (req, res) => {
     try {
-      const contractAddress = req.headers["lcs-address"];
+      const contractAddress = req.headers["qiu-address"];
 
       // Execute the Hardhat task
       const { run } = require("hardhat");
@@ -128,7 +128,7 @@ module.exports = {
   // get all entities
   entityInfo: asyncHandler(async (req, res) => {
     try {
-      const contractAddress = req.headers["lcs-address"];
+      const contractAddress = req.headers["qiu-address"];
 
       const domain = req.params.domain;
 
@@ -149,7 +149,7 @@ module.exports = {
   }),
   transferInfo: asyncHandler(async (req, res) => {
     try {
-      const contractAddress = req.headers["lcs-address"];
+      const contractAddress = req.headers["qiu-address"];
 
       const transferHash = req.params.transferHash;
 

@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract LocalCoinSettlementV2 is Ownable {
+contract Qiu is Ownable {
     bytes32[] public entities;
     // Struct to hold information about an entity
     struct EntityInfo {
