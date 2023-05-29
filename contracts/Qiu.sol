@@ -104,6 +104,44 @@ contract Qiu is Ownable {
         entity.disable = true;
     }
 
+    // Create multiple transfer requests at once (sender)
+    function batchTransferRequest(
+        string[] memory _originDomains,
+        string[] memory _destinationDomains,
+        uint256[] memory _amounts,
+        bytes[] memory _encryptedOrigins,
+        bytes[] memory _encryptedDestinations,
+        uint256[] memory _expirations,
+        string[] memory _externalRefs
+    ) external returns (bytes32[] memory) {
+        require(
+            _originDomains.length == _destinationDomains.length &&
+                _originDomains.length == _amounts.length &&
+                _originDomains.length == _encryptedOrigins.length &&
+                _originDomains.length == _encryptedDestinations.length &&
+                _originDomains.length == _expirations.length &&
+                _originDomains.length == _externalRefs.length,
+            "All arrays must have the same length"
+        );
+
+        bytes32[] memory transferHashes = new bytes32[](_originDomains.length);
+
+        for (uint256 i = 0; i < _originDomains.length; i++) {
+            bytes32 transferHash = transferRequest(
+                _originDomains[i],
+                _destinationDomains[i],
+                _amounts[i],
+                _encryptedOrigins[i],
+                _encryptedDestinations[i],
+                _expirations[i],
+                _externalRefs[i]
+            );
+
+            transferHashes[i] = transferHash;
+        }
+        return transferHashes;
+    }
+
     // Create a new transfer request (sender)
     // _encrtyptedOrigin and _encrtyptedDestination are encryped with destination public key
     function transferRequest(
@@ -114,7 +152,7 @@ contract Qiu is Ownable {
         bytes memory _encryptedDestination,
         uint256 _expiration,
         string memory _externalRef
-    ) external returns (bytes32) {
+    ) internal returns (bytes32) {
         bytes32 originDomainHash = getDomainHash(_originDomain);
         bytes32 destinationDomainHash = getDomainHash(_destinationDomain);
 
