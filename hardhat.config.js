@@ -19,7 +19,7 @@ const LACHAIN_EXPLORER_URL = process.env.LACHAIN_EXPLORER_URL;
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  defaultNetwork: "hardhat",
+  defaultNetwork: process.env.SELECTED_NETWORK || "hardhat",
   networks: {
     goerli: {
       url: GOERLI_RPC_URL,

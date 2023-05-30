@@ -152,7 +152,7 @@ contract Qiu is Ownable {
         bytes memory _encryptedDestination,
         uint256 _expiration,
         string memory _externalRef
-    ) internal returns (bytes32) {
+    ) public returns (bytes32) {
         bytes32 originDomainHash = getDomainHash(_originDomain);
         bytes32 destinationDomainHash = getDomainHash(_destinationDomain);
 
