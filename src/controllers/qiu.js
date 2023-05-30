@@ -26,6 +26,39 @@ module.exports = {
     }
   }),
 
+  batchCreateTransferRequest: asyncHandler(async (req, res) => {
+    try {
+      const body = req.body;
+      const contractAddress = req.headers["qiu-address"];
+
+      // Execute the Hardhat task
+      const { run } = require("hardhat");
+      const { batchtransferRequestTx, transferHashes } = await run(
+        "batch-transfer-request",
+        {
+          contractAddress: contractAddress,
+          originDomains: body.originDomains,
+          destinationDomains: body.destinationDomains,
+          amounts: body.amounts,
+          encryptedOrigins: body.encryptedOrigins,
+          encryptedDestinations: body.encryptedDestinations,
+          expirations: body.expirations,
+          externalRefs: body.externalRefs,
+        }
+      );
+
+      // Respond with success
+      res.status(200).json({
+        txHash: batchtransferRequestTx.hash,
+        transferHashes: transferHashes,
+      });
+    } catch (error) {
+      // Handle task execution errors
+      console.error(error);
+      res.sendStatus(500);
+    }
+  }),
+
   createTransferRequest: asyncHandler(async (req, res) => {
     try {
       const body = req.body;
