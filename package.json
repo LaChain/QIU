@@ -19,7 +19,8 @@
     "express-async-handler": "^1.1.4",
     "express-body-parser-error-handler": "^1.0.4",
     "hardhat": "^2.10.2",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "winston": "^3.9.0"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
