@@ -1,4 +1,5 @@
 const asyncHandler = require("express-async-handler");
+const { InternalServerError } = require("../errors/commonErrors");
 
 module.exports = {
   registerEntity: asyncHandler(async (req, res, next) => {
@@ -22,7 +23,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
 
@@ -55,7 +56,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
 
@@ -88,7 +89,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
   batchAcceptTransfers: asyncHandler(async (req, res) => {
@@ -110,7 +111,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
   batchCancelTransfers: asyncHandler(async (req, res) => {
@@ -132,7 +133,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
 
@@ -154,7 +155,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
 
@@ -177,7 +178,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
   transferInfo: asyncHandler(async (req, res) => {
@@ -198,7 +199,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
 };

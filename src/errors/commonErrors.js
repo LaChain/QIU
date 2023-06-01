@@ -3,6 +3,15 @@ class ApiError extends Error {
     super(message);
     this.statusCode = statusCode;
     this.errorType = errorType;
+    this.name = "ApiError";
+  }
+
+  serializeError() {
+    return {
+      statusCode: this.statusCode,
+      errorType: this.errorType,
+      message: this.message,
+    };
   }
 }
 
@@ -30,47 +39,9 @@ class NotFoundError extends ApiError {
   }
 }
 
-class UnprocessableEntityError extends ApiError {
-  constructor(message) {
-    super(422, "unprocessable_entity_error", message);
-  }
-}
-
-class TooManyRequestsError extends ApiError {
-  constructor() {
-    super(429, "too_many_requests_error", "Too many requests, try again later");
-  }
-}
-
 class InternalServerError extends ApiError {
   constructor(message) {
     super(500, "internal_server_error", message || "Something went wrong");
-  }
-}
-
-class BadGatewayError extends ApiError {
-  constructor(message) {
-    super(502, "bad_gateway_error", message);
-  }
-}
-
-class ServiceUnavailableError extends ApiError {
-  constructor() {
-    super(
-      503,
-      "service_unavailable_error",
-      "Error requesting third party service"
-    );
-  }
-}
-
-class GatewayTimeoutError extends ApiError {
-  constructor() {
-    super(
-      504,
-      "gateway_timeout_error",
-      "Timeout requesting third party service"
-    );
   }
 }
 
@@ -79,10 +50,6 @@ module.exports = {
   UnauthorizedError,
   ForbiddenError,
   NotFoundError,
-  UnprocessableEntityError,
-  TooManyRequestsError,
   InternalServerError,
-  BadGatewayError,
-  ServiceUnavailableError,
-  GatewayTimeoutError,
+  ApiError,
 };
