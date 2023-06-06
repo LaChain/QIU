@@ -746,4 +746,37 @@ describe("Test Qiu", function () {
       assert.equal(decryptDestination, userDest);
     });
   });
+  describe("Test pausable", function () {
+    it("Revert - test paused", async function () {
+      // test pausable
+      const { owner, qiu } = await loadFixture(deployFixture);
+      await qiu.connect(owner).pause();
+      await expect(qiu.connect(owner).pause()).to.be.revertedWith(
+        "Pausable: paused"
+      );
+    });
+    // test whenNotPaused
+    it("Revert - test whenNotPaused", async function () {
+      const { owner, qiu } = await loadFixture(deployFixture);
+      await qiu.connect(owner).pause();
+      await expect(
+        qiu.connect(owner).registerEntity("test", owner.address, "0x")
+      ).to.be.revertedWith("Pausable: paused");
+    });
+
+    it("Test pause and unpause events", async function () {
+      const { owner, qiu } = await loadFixture(deployFixture);
+      //assert event
+      await expect(qiu.connect(owner).pause())
+        .to.emit(qiu, "Paused")
+        .withArgs(owner.address);
+
+      //assert event
+      await expect(qiu.connect(owner).unpause())
+        .to.emit(qiu, "Unpaused")
+        .withArgs(owner.address);
+
+      await qiu.connect(owner).registerEntity("test", owner.address, "0x");
+    });
+  });
 });
