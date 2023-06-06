@@ -20,7 +20,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
   nativeTransfer: asyncHandler(async (req, res, next) => {
@@ -44,7 +44,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
   encrypt: asyncHandler(async (req, res, next) => {
@@ -69,7 +69,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
 };

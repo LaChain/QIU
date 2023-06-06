@@ -1,6 +1,11 @@
 const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
-const { createIdentity, encrypt, decrypt } = require("./utils");
+const {
+  createIdentity,
+  encrypt,
+  decrypt,
+  getTransferHash,
+} = require("./utils");
 const {
   loadFixture,
   time,
@@ -73,60 +78,64 @@ describe("Test Qiu", function () {
     };
   }
 
-  async function newTransferRequest(
+  async function batchTransferRequest(
     tERC20,
     qiu,
-    entityOrigin,
-    originDomain,
-    destinationDomain,
-    tokenAmount,
-    encryptedOrigin,
-    encryptedDestination,
-    expirationTime,
-    externalReference
+    entityOrigins,
+    originDomains,
+    destinationDomains,
+    tokenAmounts,
+    encryptedOrigins,
+    encryptedDestinations,
+    expirationTimes,
+    externalReferences
   ) {
-    // approve tokens
-    await tERC20.connect(entityOrigin).approve(qiu.address, tokenAmount);
-    const originDomainHash = await qiu.getDomainHash(originDomain);
-    const destinationDomainHash = await qiu.getDomainHash(destinationDomain);
-    const entityInfo = await qiu.domainHashToEntity(originDomainHash);
+    let transferHashes = [];
+    let totalAmount = bn("0");
+    // loop over all transfers
+    for (let i = 0; i < tokenAmounts.length; i++) {
+      const entityOrigin = entityOrigins[i];
+      const originDomain = originDomains[i];
+      const destinationDomain = destinationDomains[i];
+      const tokenAmount = tokenAmounts[i];
+      const encryptedOrigin = encryptedOrigins[i];
+      const encryptedDestination = encryptedDestinations[i];
+      const expirationTime = expirationTimes[i];
 
-    const transferHash = ethers.utils.solidityKeccak256(
-      [
-        "address",
-        "bytes32",
-        "bytes32",
-        "uint256",
-        "bytes",
-        "bytes",
-        "uint256",
-        "uint256",
-      ],
-      [
+      const originDomainHash = await qiu.getDomainHash(originDomain);
+      const destinationDomainHash = await qiu.getDomainHash(destinationDomain);
+      const entityInfo = await qiu.domainHashToEntity(originDomainHash);
+
+      const transferHash = getTransferHash(
         entityOrigin.address,
         originDomainHash,
         destinationDomainHash,
         tokenAmount,
         encryptedOrigin,
         encryptedDestination,
-        entityInfo.nonce,
-        expirationTime,
-      ]
-    );
-
-    await qiu
-      .connect(entityOrigin)
-      .transferRequest(
-        originDomain,
-        destinationDomain,
-        tokenAmount,
-        encryptedOrigin,
-        encryptedDestination,
-        expirationTime,
-        externalReference
+        entityInfo.nonce.add(i),
+        expirationTime
       );
 
-    return transferHash;
+      transferHashes.push(transferHash);
+      totalAmount = totalAmount.add(tokenAmount);
+    }
+
+    await tERC20.connect(entityOrigins[0]).approve(qiu.address, totalAmount);
+
+    await qiu
+      .connect(entityOrigins[0])
+      .batchTransferRequest(
+        originDomains,
+        destinationDomains,
+        tokenAmounts,
+        encryptedOrigins,
+        encryptedDestinations,
+        expirationTimes,
+        externalReferences
+      );
+
+    return transferHashes;
   }
 
   async function deployFixtureAndTransferRequest() {
@@ -182,14 +191,14 @@ describe("Test Qiu", function () {
     await expect(
       qiu
         .connect(entity1)
-        .transferRequest(
-          originDomain,
-          destinationDomain,
-          tokenAmount,
-          encryptedOrigin,
-          encryptedDestination,
-          ONE_WEEK_IN_SECS,
-          externalReference
+        .batchTransferRequest(
+          [originDomain],
+          [destinationDomain],
+          [tokenAmount],
+          [encryptedOrigin],
+          [encryptedDestination],
+          [ONE_WEEK_IN_SECS],
+          [externalReference]
         )
     )
       .to.emit(qiu, "NewTransferRequest")
@@ -265,14 +274,14 @@ describe("Test Qiu", function () {
       await expect(
         qiu
           .connect(entity1)
-          .transferRequest(
-            "entity1.cvu",
-            "entity1.cvu",
-            "1",
-            "0x",
-            "0x",
-            ONE_WEEK_IN_SECS,
-            "0x"
+          .batchTransferRequest(
+            ["entity1.cvu"],
+            ["entity1.cvu"],
+            ["1"],
+            ["0x"],
+            ["0x"],
+            [ONE_WEEK_IN_SECS],
+            ["0x"]
           )
       ).to.be.revertedWith("origin and destination are the same");
     });
@@ -282,14 +291,14 @@ describe("Test Qiu", function () {
       await expect(
         qiu
           .connect(entity1)
-          .transferRequest(
-            "entity1.cvu",
-            "entity2.cvu",
-            "1",
-            "0x",
-            "0x",
-            ONE_WEEK_IN_SECS,
-            "0x"
+          .batchTransferRequest(
+            ["entity1.cvu"],
+            ["entity2.cvu"],
+            ["1"],
+            ["0x"],
+            ["0x"],
+            [ONE_WEEK_IN_SECS],
+            ["0x"]
           )
       ).to.be.revertedWith("Entity not registered");
     });
@@ -304,14 +313,14 @@ describe("Test Qiu", function () {
       await expect(
         qiu
           .connect(entity1)
-          .transferRequest(
-            domain,
-            "entity2.cvu",
-            "1",
-            "0x",
-            "0x",
-            ONE_WEEK_IN_SECS,
-            "0x"
+          .batchTransferRequest(
+            [domain],
+            ["entity2.cvu"],
+            ["1"],
+            ["0x"],
+            ["0x"],
+            [ONE_WEEK_IN_SECS],
+            ["0x"]
           )
       ).to.be.revertedWith("Entity disabled");
     });
@@ -326,14 +335,14 @@ describe("Test Qiu", function () {
       await expect(
         qiu
           .connect(owner)
-          .transferRequest(
-            domain,
-            "entity2.cvu",
-            "1",
-            "0x",
-            "0x",
-            ONE_WEEK_IN_SECS,
-            "0x"
+          .batchTransferRequest(
+            [domain],
+            ["entity2.cvu"],
+            ["1"],
+            ["0x"],
+            ["0x"],
+            [ONE_WEEK_IN_SECS],
+            ["0x"]
           )
       ).to.be.revertedWith("Not authorized");
     });
@@ -348,14 +357,14 @@ describe("Test Qiu", function () {
       await expect(
         qiu
           .connect(entity1)
-          .transferRequest(
-            "entity1.cvu",
-            "entity2.cvu",
-            "1",
-            "0x",
-            "0x",
-            ONE_WEEK_IN_SECS,
-            "0x"
+          .batchTransferRequest(
+            ["entity1.cvu"],
+            ["entity2.cvu"],
+            ["1"],
+            ["0x"],
+            ["0x"],
+            [ONE_WEEK_IN_SECS],
+            ["0x"]
           )
       ).to.be.revertedWith("Entity not registered");
     });
@@ -378,14 +387,14 @@ describe("Test Qiu", function () {
       await expect(
         qiu
           .connect(entity1)
-          .transferRequest(
-            domain,
-            domain2,
-            "1",
-            "0x",
-            "0x",
-            ONE_WEEK_IN_SECS,
-            "0x"
+          .batchTransferRequest(
+            [domain],
+            [domain2],
+            ["1"],
+            ["0x"],
+            ["0x"],
+            [ONE_WEEK_IN_SECS],
+            ["0x"]
           )
       ).to.be.revertedWith("Entity disabled");
     });
@@ -409,14 +418,14 @@ describe("Test Qiu", function () {
       await expect(
         qiu
           .connect(entity1)
-          .transferRequest(
-            domain,
-            domain2,
-            "1",
-            "0x",
-            "0x",
-            ONE_WEEK_IN_SECS,
-            "0x"
+          .batchTransferRequest(
+            [domain],
+            [domain2],
+            ["1"],
+            ["0x"],
+            ["0x"],
+            [ONE_WEEK_IN_SECS],
+            ["0x"]
           )
       ).to.be.revertedWith("ERC20: insufficient allowance");
     });
@@ -431,6 +440,76 @@ describe("Test Qiu", function () {
       assert.equal(await tERC20.balanceOf(qiu.address), tokenAmount);
       const transferInfo = await qiu.transfers(transferHash);
       assert.equal(transferInfo.status, 0);
+    });
+    it("should create many transfer Requests", async function () {
+      const {
+        entity1,
+        qiu,
+        tERC20,
+        originDomain,
+        destinationDomain,
+        encryptedOrigin,
+        encryptedDestination,
+        expiryTime,
+      } = await loadFixture(deployFixtureAndTransferRequest);
+
+      const transferHashes = await batchTransferRequest(
+        tERC20,
+        qiu,
+        [entity1, entity1, entity1],
+        [originDomain, originDomain, originDomain],
+        [destinationDomain, destinationDomain, destinationDomain],
+        ["1", "2", "3"],
+        [encryptedOrigin, encryptedOrigin, encryptedOrigin],
+        [encryptedDestination, encryptedDestination, encryptedDestination],
+        [expiryTime, expiryTime, expiryTime],
+        ["0x", "0x", "0x"]
+      );
+    });
+    it("should create a high number of transfer Requests", async function () {
+      const {
+        entity1,
+        qiu,
+        tERC20,
+        originDomain,
+        destinationDomain,
+        encryptedOrigin,
+        encryptedDestination,
+        expiryTime,
+      } = await loadFixture(deployFixtureAndTransferRequest);
+
+      let entities = [];
+      let originDomains = [];
+      let destinationDomains = [];
+      let amounts = [];
+      let encryptedOrigins = [];
+      let encryptedDestinations = [];
+      let expiryTimes = [];
+      let data = [];
+
+      for (let i = 0; i < 50; i++) {
+        entities.push(entity1);
+        originDomains.push(originDomain);
+        destinationDomains.push(destinationDomain);
+        amounts.push("1");
+        encryptedOrigins.push(encryptedOrigin);
+        encryptedDestinations.push(encryptedDestination);
+        expiryTimes.push(expiryTime);
+        data.push("0x");
+      }
+
+      const transferHashes = await batchTransferRequest(
+        tERC20,
+        qiu,
+        entities,
+        originDomains,
+        destinationDomains,
+        amounts,
+        encryptedOrigins,
+        encryptedDestinations,
+        expiryTimes,
+        data
+      );
     });
   });
 
@@ -496,18 +575,20 @@ describe("Test Qiu", function () {
 
       const balanceBefore = await tERC20.balanceOf(ent2.address);
 
-      const transferHash2 = await newTransferRequest(
+      const transferHashes = await batchTransferRequest(
         tERC20,
         qiu,
-        entity1,
-        originDomain,
-        destinationDomain,
-        tokenAmount,
-        "0x",
-        "0x",
-        ONE_WEEK_IN_SECS,
-        "0x"
+        [entity1],
+        [originDomain],
+        [destinationDomain],
+        [tokenAmount],
+        ["0x"],
+        ["0x"],
+        [ONE_WEEK_IN_SECS],
+        ["0x"]
       );
+
+      const transferHash2 = transferHashes[0];
       await await qiu
         .connect(entity2)
         .batchAcceptTransfer([transferHash, transferHash2]);
@@ -576,18 +657,20 @@ describe("Test Qiu", function () {
         destinationDomain,
       } = await loadFixture(deployFixtureAndTransferRequest);
 
-      const transferHash2 = await newTransferRequest(
+      const transferHashes = await batchTransferRequest(
         tERC20,
         qiu,
-        entity1,
-        originDomain,
-        destinationDomain,
-        tokenAmount,
-        "0x",
-        "0x",
-        ONE_WEEK_IN_SECS,
-        "0x"
+        [entity1],
+        [originDomain],
+        [destinationDomain],
+        [tokenAmount],
+        ["0x"],
+        ["0x"],
+        [ONE_WEEK_IN_SECS],
+        ["0x"]
       );
+
+      const transferHash2 = transferHashes[0];
 
       const transferInfo2before = await qiu.transfers(transferHash2);
       await time.increaseTo(bn(transferInfo2before.expiration).add(1));
@@ -634,18 +717,20 @@ describe("Test Qiu", function () {
       const expiryTime = (await time.latest()) + ONE_WEEK_IN_SECS + 1;
       const externalReference = "0x";
 
-      const transferHash = await newTransferRequest(
+      const transferHashes = await batchTransferRequest(
         tERC20,
         qiu,
-        entity1,
-        originDomain,
-        destinationDomain,
-        tokenAmount,
-        encryptedOrigin,
-        encryptedDestination,
-        expiryTime,
-        externalReference
+        [entity1],
+        [originDomain],
+        [destinationDomain],
+        [tokenAmount],
+        [encryptedOrigin],
+        [encryptedDestination],
+        [expiryTime],
+        [externalReference]
       );
+
+      const transferHash = transferHashes[0];
       const balanceBefore = await tERC20.balanceOf(entity2.address);
       await qiu.connect(entity2).batchAcceptTransfer([transferHash]);
 
@@ -659,6 +744,39 @@ describe("Test Qiu", function () {
       );
       assert.equal(decryptOrigin, userOrigin);
       assert.equal(decryptDestination, userDest);
+    });
+  });
+  describe("Test pausable", function () {
+    it("Revert - test paused", async function () {
+      // test pausable
+      const { owner, qiu } = await loadFixture(deployFixture);
+      await qiu.connect(owner).pause();
+      await expect(qiu.connect(owner).pause()).to.be.revertedWith(
+        "Pausable: paused"
+      );
+    });
+    // test whenNotPaused
+    it("Revert - test whenNotPaused", async function () {
+      const { owner, qiu } = await loadFixture(deployFixture);
+      await qiu.connect(owner).pause();
+      await expect(
+        qiu.connect(owner).registerEntity("test", owner.address, "0x")
+      ).to.be.revertedWith("Pausable: paused");
+    });
+
+    it("Test pause and unpause events", async function () {
+      const { owner, qiu } = await loadFixture(deployFixture);
+      //assert event
+      await expect(qiu.connect(owner).pause())
+        .to.emit(qiu, "Paused")
+        .withArgs(owner.address);
+
+      //assert event
+      await expect(qiu.connect(owner).unpause())
+        .to.emit(qiu, "Unpaused")
+        .withArgs(owner.address);
+
+      await qiu.connect(owner).registerEntity("test", owner.address, "0x");
     });
   });
 });

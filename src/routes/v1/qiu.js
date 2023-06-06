@@ -5,6 +5,9 @@ const setConfig = require("../../middlewares/setConfig");
 
 api.route("/register-entity").post(setConfig, qiuController.registerEntity);
 api
+  .route("/batch-transfer-request")
+  .post(setConfig, qiuController.batchCreateTransferRequest);
+api
   .route("/transfer-request")
   .post(setConfig, qiuController.createTransferRequest);
 api

@@ -10,6 +10,7 @@ const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const bodyParserErrorHandler = require("express-body-parser-error-handler");
+const { errorHandler } = require("./middlewares/error-handler");
 const { BadRequestError } = require("./errors/commonErrors");
 
 const { default: axios } = require("axios");
@@ -45,5 +46,8 @@ app.use("/v1/qiu/", qiuRoutes);
 
 const routes = [require("./routes/v1/helpers")];
 app.use("/v1/", routes);
+
+//error handler
+app.use(errorHandler);
 
 module.exports = app;

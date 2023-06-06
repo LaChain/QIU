@@ -19,7 +19,7 @@ const LACHAIN_EXPLORER_URL = process.env.LACHAIN_EXPLORER_URL;
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  defaultNetwork: "lachain",
+  defaultNetwork: process.env.SELECTED_NETWORK || "hardhat",
   networks: {
     goerli: {
       url: GOERLI_RPC_URL,
@@ -53,7 +53,7 @@ module.exports = {
     ],
   },
   gasReporter: {
-    enabled: false,
+    enabled: true,
   },
   solidity: {
     version: "0.8.9",

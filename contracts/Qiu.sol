@@ -2,9 +2,10 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract Qiu is Ownable {
+contract Qiu is Ownable, Pausable {
     bytes32[] public entities;
     // Struct to hold information about an entity
     struct EntityInfo {
@@ -79,7 +80,7 @@ contract Qiu is Ownable {
         string memory _domain,
         address _entityAddress,
         bytes memory _publicKey
-    ) public onlyOwner {
+    ) public onlyOwner whenNotPaused {
         require(bytes(_domain).length > 0, "domain can not be empty");
         bytes32 domainHash = keccak256(bytes(_domain));
         EntityInfo storage entity = domainHashToEntity[domainHash];
@@ -97,11 +98,51 @@ contract Qiu is Ownable {
     }
 
     // Disable an existing entity (only owner)
-    function disableEntity(string memory _domain) external onlyOwner {
+    function disableEntity(
+        string memory _domain
+    ) external onlyOwner whenNotPaused {
         bytes32 domainHash = getDomainHash(_domain);
         EntityInfo storage entity = domainHashToEntity[domainHash];
         require(entity.entityAddress != address(0), "entity does not exist");
         entity.disable = true;
+    }
+
+    // Create multiple transfer requests at once (sender)
+    function batchTransferRequest(
+        string[] memory _originDomains,
+        string[] memory _destinationDomains,
+        uint256[] memory _amounts,
+        bytes[] memory _encryptedOrigins,
+        bytes[] memory _encryptedDestinations,
+        uint256[] memory _expirations,
+        string[] memory _externalRefs
+    ) external whenNotPaused returns (bytes32[] memory) {
+        require(
+            _originDomains.length == _destinationDomains.length &&
+                _originDomains.length == _amounts.length &&
+                _originDomains.length == _encryptedOrigins.length &&
+                _originDomains.length == _encryptedDestinations.length &&
+                _originDomains.length == _expirations.length &&
+                _originDomains.length == _externalRefs.length,
+            "All arrays must have the same length"
+        );
+
+        bytes32[] memory transferHashes = new bytes32[](_originDomains.length);
+
+        for (uint256 i = 0; i < _originDomains.length; i++) {
+            bytes32 transferHash = transferRequest(
+                _originDomains[i],
+                _destinationDomains[i],
+                _amounts[i],
+                _encryptedOrigins[i],
+                _encryptedDestinations[i],
+                _expirations[i],
+                _externalRefs[i]
+            );
+
+            transferHashes[i] = transferHash;
+        }
+        return transferHashes;
     }
 
     // Create a new transfer request (sender)
@@ -114,7 +155,7 @@ contract Qiu is Ownable {
         bytes memory _encryptedDestination,
         uint256 _expiration,
         string memory _externalRef
-    ) external returns (bytes32) {
+    ) private returns (bytes32) {
         bytes32 originDomainHash = getDomainHash(_originDomain);
         bytes32 destinationDomainHash = getDomainHash(_destinationDomain);
 
@@ -205,14 +246,18 @@ contract Qiu is Ownable {
     }
 
     // Accept multiple transfer requests at once (destination)
-    function batchAcceptTransfer(bytes32[] calldata _transferHashes) external {
+    function batchAcceptTransfer(
+        bytes32[] calldata _transferHashes
+    ) external whenNotPaused {
         for (uint256 i = 0; i < _transferHashes.length; i++) {
             acceptTransfer(_transferHashes[i]);
         }
     }
 
     // Cancel multiple transfer requests at once (destination)
-    function batchCancelTransfer(bytes32[] calldata _transferHashes) external {
+    function batchCancelTransfer(
+        bytes32[] calldata _transferHashes
+    ) external whenNotPaused {
         for (uint256 i = 0; i < _transferHashes.length; i++) {
             cancelTransfer(_transferHashes[i]);
         }
@@ -287,6 +332,14 @@ contract Qiu is Ownable {
         );
 
         emit TransferCancelled(_transferHash, originInfo.entityAddress);
+    }
+
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     function getAllEntities() public view returns (EntityInfo[] memory) {

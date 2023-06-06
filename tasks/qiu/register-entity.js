@@ -1,5 +1,5 @@
 const { task } = require("hardhat/config");
-const { getSignerInConfig, setProvider } = require("../../utils/helpers");
+const { getSignerInConfig } = require("../../utils/helpers");
 
 task("register-entity", "Adds a new entity")
   .addParam("contractAddress", "qiu contract address")

@@ -19,4 +19,39 @@ const createIdentity = () => {
   return identity;
 };
 
-module.exports = { encrypt, decrypt, createIdentity };
+const getTransferHash = (
+  entityOriginAddress,
+  originDomainHash,
+  destinationDomainHash,
+  tokenAmount,
+  encryptedOrigin,
+  encryptedDestination,
+  nonce,
+  expirationTime
+) => {
+  const transferHash = ethers.utils.solidityKeccak256(
+    [
+      "address",
+      "bytes32",
+      "bytes32",
+      "uint256",
+      "bytes",
+      "bytes",
+      "uint256",
+      "uint256",
+    ],
+    [
+      entityOriginAddress,
+      originDomainHash,
+      destinationDomainHash,
+      tokenAmount,
+      encryptedOrigin,
+      encryptedDestination,
+      nonce,
+      expirationTime,
+    ]
+  );
+  return transferHash;
+};
+
+module.exports = { encrypt, decrypt, createIdentity, getTransferHash };

@@ -1,4 +1,5 @@
 const asyncHandler = require("express-async-handler");
+const { InternalServerError } = require("../errors/commonErrors");
 
 module.exports = {
   registerEntity: asyncHandler(async (req, res, next) => {
@@ -22,7 +23,40 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
+    }
+  }),
+
+  batchCreateTransferRequest: asyncHandler(async (req, res) => {
+    try {
+      const body = req.body;
+      const contractAddress = req.headers["qiu-address"];
+
+      // Execute the Hardhat task
+      const { run } = require("hardhat");
+      const { batchtransferRequestTx, transferHashes } = await run(
+        "batch-transfer-request",
+        {
+          contractAddress: contractAddress,
+          originDomains: body.originDomains,
+          destinationDomains: body.destinationDomains,
+          amounts: body.amounts,
+          encryptedOrigins: body.encryptedOrigins,
+          encryptedDestinations: body.encryptedDestinations,
+          expirations: body.expirations,
+          externalRefs: body.externalRefs,
+        }
+      );
+
+      // Respond with success
+      res.status(200).json({
+        txHash: batchtransferRequestTx.hash,
+        transferHashes: transferHashes,
+      });
+    } catch (error) {
+      // Handle task execution errors
+      console.error(error);
+      throw new InternalServerError(error);
     }
   }),
 
@@ -55,7 +89,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
   batchAcceptTransfers: asyncHandler(async (req, res) => {
@@ -77,7 +111,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
   batchCancelTransfers: asyncHandler(async (req, res) => {
@@ -99,7 +133,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
 
@@ -121,7 +155,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
 
@@ -144,7 +178,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
   transferInfo: asyncHandler(async (req, res) => {
@@ -165,7 +199,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
 };
