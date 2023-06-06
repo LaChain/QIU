@@ -14,3 +14,11 @@ PRIVATE_KEY=dfba...
 ```
 npx hardhat run scripts/deploy.js --network lachain
 ```
+
+## Run api
+
+To run the API, please ensure that you have Docker installed and running on your system.
+
+```
+docker-compose up
+```

@@ -1,4 +1,4 @@
-# Local Coin Settlement
+# QIU
 
 # Getting Started
 
@@ -28,4 +28,4 @@ npm run test
 ```
 
 Guide to deploy contracts [here](/docs/deploy.md).
-Guide to test the lcs-flow [here](/docs/lcs-flow.md).
+Guide to test the qiu-flow [here](/docs/qiu-flow.md).

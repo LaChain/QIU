@@ -38,22 +38,16 @@ async function main() {
     ]);
   }
 
-  console.log("Deploying LocalCoinSettlementV2...");
-  const LocalCoinSettlementV2 = await hre.ethers.getContractFactory(
-    "LocalCoinSettlementV2"
-  );
-  const localCoinSettlementV2 = await LocalCoinSettlementV2.connect(
-    owner
-  ).deploy(tERC20.address);
-  await localCoinSettlementV2.deployed();
-  console.log(
-    `LocalCoinSettlementV2 deployed to ${localCoinSettlementV2.address}`
-  );
+  console.log("Deploying Qiu...");
+  const Qiu = await hre.ethers.getContractFactory("Qiu");
+  const qiu = await Qiu.connect(owner).deploy(tERC20.address);
+  await qiu.deployed();
+  console.log(`Qiu deployed to ${qiu.address}`);
 
   if (hre.config.etherscan.apiKey) {
     console.log("Waiting for block confirmations...");
-    await localCoinSettlementV2.deployTransaction.wait(6);
-    await verify(localCoinSettlementV2.address, [tERC20.address]);
+    await qiu.deployTransaction.wait(6);
+    await verify(qiu.address, [tERC20.address]);
   }
 }
 

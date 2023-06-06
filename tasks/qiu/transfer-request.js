@@ -1,7 +1,7 @@
 const { task } = require("hardhat/config");
 
 task("transfer-request", "Initiate a transfer request")
-  .addParam("contractAddress", "lcs contract address")
+  .addParam("contractAddress", "qiu contract address")
   .addParam("originDomain", "origin domain")
   .addParam("destinationDomain", "destination domain")
   .addParam("amount", "Amount of the transfer request")
@@ -13,9 +13,9 @@ task("transfer-request", "Initiate a transfer request")
     await hre.setup();
     const sender = hre.network.config.sender;
 
-    const lcs = (
-      await hre.ethers.getContractFactory("LocalCoinSettlementV2")
-    ).attach(taskArgs.contractAddress);
+    const qiu = (await hre.ethers.getContractFactory("Qiu")).attach(
+      taskArgs.contractAddress
+    );
 
     // get transfer hash
     const transferHash = await hre.run("get-transfer-hash", {
@@ -30,7 +30,7 @@ task("transfer-request", "Initiate a transfer request")
     });
 
     console.log("Transfer request...");
-    const transferRequestTx = await lcs
+    const transferRequestTx = await qiu
       .connect(sender)
       .transferRequest(
         taskArgs.originDomain,

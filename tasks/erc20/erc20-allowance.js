@@ -1,5 +1,4 @@
 const { task } = require("hardhat/config");
-const { getSignerInConfig, setProvider } = require("../../utils/helpers");
 
 task("erc20-allowance", "Allowance owner spender")
   .addParam("erc20Address", "ERC20 contract address")

@@ -1,4 +1,5 @@
 const asyncHandler = require("express-async-handler");
+const { InternalServerError } = require("../errors/commonErrors");
 
 module.exports = {
   allowance: asyncHandler(async (req, res, next) => {
@@ -26,7 +27,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
   balance: asyncHandler(async (req, res, next) => {
@@ -54,7 +55,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
   approve: asyncHandler(async (req, res, next) => {
@@ -77,7 +78,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
   mint: asyncHandler(async (req, res, next) => {
@@ -100,7 +101,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
   transfer: asyncHandler(async (req, res, next) => {
@@ -123,7 +124,7 @@ module.exports = {
     } catch (error) {
       // Handle task execution errors
       console.error(error);
-      res.sendStatus(500);
+      throw new InternalServerError(error);
     }
   }),
 };

@@ -1,8 +1,8 @@
 const { task } = require("hardhat/config");
-const { getSignerInConfig, setProvider } = require("../../utils/helpers");
+const { getSignerInConfig } = require("../../utils/helpers");
 
 task("register-entity", "Adds a new entity")
-  .addParam("contractAddress", "lcs contract address")
+  .addParam("contractAddress", "qiu contract address")
   .addParam("domain", "entity domain")
   .addParam("entityAddress", "Address of the entity")
   .addParam("publicKey", "entity public key")
@@ -10,12 +10,12 @@ task("register-entity", "Adds a new entity")
     await hre.setup();
     const sender = hre.network.config.sender;
 
-    const lcs = (
-      await hre.ethers.getContractFactory("LocalCoinSettlementV2")
-    ).attach(taskArgs.contractAddress);
+    const qiu = (await hre.ethers.getContractFactory("Qiu")).attach(
+      taskArgs.contractAddress
+    );
 
     console.log("Register a new entity...");
-    const newEntityTx = await lcs
+    const newEntityTx = await qiu
       .connect(sender)
       .registerEntity(
         taskArgs.domain,

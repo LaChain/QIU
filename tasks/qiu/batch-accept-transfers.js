@@ -1,18 +1,18 @@
 const { task } = require("hardhat/config");
 
 task("batch-accept-transfers", "Accepts a batch of transfer requests")
-  .addParam("contractAddress", "lcs contract address")
+  .addParam("contractAddress", "qiu contract address")
   .addVariadicPositionalParam("transferHashes", "Array of transfer hashes")
   .setAction(async (taskArgs, hre) => {
     await hre.setup();
     const sender = hre.network.config.sender;
 
-    const lcs = (
-      await hre.ethers.getContractFactory("LocalCoinSettlementV2")
-    ).attach(taskArgs.contractAddress);
+    const qiu = (await hre.ethers.getContractFactory("Qiu")).attach(
+      taskArgs.contractAddress
+    );
 
     console.log("Batch accept transfers...");
-    const batchAcceptTransfersTx = await lcs
+    const batchAcceptTransfersTx = await qiu
       .connect(sender)
       .batchAcceptTransfer(taskArgs.transferHashes);
     await batchAcceptTransfersTx.wait(1);

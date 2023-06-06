@@ -1,7 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv-defaults").config();
 require("./tasks/erc20/erc20-tasks");
-require("./tasks/lcsV2/lcsV2-tasks");
+require("./tasks/qiu/qiu-tasks");
 require("./tasks/utils/utils-tasks");
 const { main: setup } = require("./setup");
 const { extendEnvironment } = require("hardhat/config");
@@ -19,7 +19,7 @@ const LACHAIN_EXPLORER_URL = process.env.LACHAIN_EXPLORER_URL;
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  defaultNetwork: "lachain",
+  defaultNetwork: process.env.SELECTED_NETWORK || "hardhat",
   networks: {
     goerli: {
       url: GOERLI_RPC_URL,
