@@ -57,6 +57,3 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
-
-// npx hardhat verify 0xA5D8D2bD0c251aac9bAbefD65d2D315B5F93E43c "Ripio Coin" "RPC" 0x768A675e33Bf0ac6cFCe8f555DF77D6Ad4d79787 100000000000000000000000000 --network ropsten
-// npx hardat verify 0xAc005c7BD5e75914d01Afa1Af4cD42c2EE10D903

@@ -1,4 +1,5 @@
 const { task } = require("hardhat/config");
+const { toWei } = require("../../utils/helpers");
 
 task("erc20-approve", "Approve tokens for transfer")
   .addParam("erc20Address", "ERC20 contract address")
@@ -16,7 +17,7 @@ task("erc20-approve", "Approve tokens for transfer")
     console.log("Approve...");
     const approveTx = await tERC20
       .connect(sender)
-      .approve(taskArgs.spender, taskArgs.amount);
+      .approve(taskArgs.spender, toWei(taskArgs.amount));
     await approveTx.wait(1);
     console.log(
       `Approve spender: ${taskArgs.spender} , amount: ${taskArgs.amount}`

@@ -1,4 +1,5 @@
 const { task } = require("hardhat/config");
+const { toWei } = require("../../utils/helpers");
 
 task("erc20-transfer", "Transfer tokens from one account to another")
   .addParam("erc20Address", "ERC20 contract address")
@@ -16,7 +17,7 @@ task("erc20-transfer", "Transfer tokens from one account to another")
     console.log("Transfer...");
     const transferTx = await tERC20
       .connect(sender)
-      .transfer(taskArgs.to, taskArgs.amount);
+      .transfer(taskArgs.to, toWei(taskArgs.amount));
     await transferTx.wait(1);
     console.log(
       `Transfer from: ${sender.address} , to: ${taskArgs.to} , amount: ${taskArgs.amount}`

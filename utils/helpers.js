@@ -47,4 +47,9 @@ const getTransferHash = (
   return transferHash;
 };
 
-module.exports = { getSignerInConfig, getTransferHash };
+// amount to wei
+const toWei = (amount) => {
+  return ethers.utils.parseUnits(amount, "ether");
+};
+
+module.exports = { getSignerInConfig, getTransferHash, toWei };
