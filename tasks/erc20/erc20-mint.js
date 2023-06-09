@@ -1,4 +1,5 @@
 const { task } = require("hardhat/config");
+const { toWei } = require("../../utils/helpers");
 
 task("erc20-mint", "Mint tokens on an ERC20 mintable contract")
   .addParam("erc20Address", "ERC20 contract address")
@@ -15,7 +16,7 @@ task("erc20-mint", "Mint tokens on an ERC20 mintable contract")
     console.log("Mint...");
     const mintTx = await tERC20
       .connect(sender)
-      .mint(taskArgs.account, taskArgs.amount);
+      .mint(taskArgs.account, toWei(taskArgs.amount));
     await mintTx.wait(1);
     console.log(
       `Mint account: ${taskArgs.account} , amount: ${taskArgs.amount}`

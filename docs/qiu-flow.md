@@ -5,8 +5,8 @@
 Example:
 
 ```
-ERC20: 0x8Cf5f77ddec2D73276C0C810ab3aD7B29be52409
-Qiu: 0xE0506a00C036C2c05Fc0b3D9BAb530CC81AB502B
+ERC20: 0x8d6b9F2b28260Bb388424db3c2a92e2E0164Bd7c
+Qiu: 0x6aD18D9D66933eF51D3bE117c425Ce355251f213
 ```
 
 ## Setup env vars
@@ -43,7 +43,7 @@ address: '0xA4C0c9e95ef693464383b9CF4E405d9a3E7aE825'
 }
 
 ```
-npx hardhat --network lachain register-entity --contract-address 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC --entity-address 0xA4C0c9e95ef693464383b9CF4E405d9a3E7aE825 --domain "entity1.cvu" --public-key 0x56e67a981b41f64c587bb9750ca5d6cd12f240c6f6ba2439277f882843d5054629efaefbf549e99e5e2768f6acfb458c92dd6abfe8ceccf1418a2caca3dea607
+npx hardhat --network lachain register-entity --contract-address 0x6aD18D9D66933eF51D3bE117c425Ce355251f213 --entity-address 0xA4C0c9e95ef693464383b9CF4E405d9a3E7aE825 --domain "entity1.cvu" --public-key 0x56e67a981b41f64c587bb9750ca5d6cd12f240c6f6ba2439277f882843d5054629efaefbf549e99e5e2768f6acfb458c92dd6abfe8ceccf1418a2caca3dea607
 ```
 
 ## Register entity 2 (sender: admin)
@@ -56,7 +56,7 @@ address: '0x39f76952100495698C5a9a0441DcD14fBB814bE3'
 }
 
 ```
-npx hardhat --network lachain register-entity --contract-address 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC --entity-address 0x39f76952100495698C5a9a0441DcD14fBB814bE3 --domain "entity2.cvu" --public-key 0xcc95c03effdb2486c2f59878125840bfce43324452c8ae63a992adeb77b7c9049c81e96b7dc23df9d291c776f9aee699e6655785a593aa3958ed677b0b91c120
+npx hardhat --network lachain register-entity --contract-address 0x6aD18D9D66933eF51D3bE117c425Ce355251f213 --entity-address 0x39f76952100495698C5a9a0441DcD14fBB814bE3 --domain "entity2.cvu" --public-key 0xcc95c03effdb2486c2f59878125840bfce43324452c8ae63a992adeb77b7c9049c81e96b7dc23df9d291c776f9aee699e6655785a593aa3958ed677b0b91c120
 ```
 
 ## Set up entities
@@ -82,7 +82,7 @@ npx hardhat --network lachain erc20-transfer --erc20-address 0x3b9d9e6c956f2885a
 npx hardhat --network lachain erc20-transfer --erc20-address 0x3b9d9e6c956f2885a272ca1da2aa63bf59bdf939 --to 0x39f76952100495698C5a9a0441DcD14fBB814bE3 --amount 100
 ```
 
-## Step 2 - transfer Request (sender: entity 1)
+## Step 2 - batch transfer Request (sender: entity 1)
 
 userOrigin = "user_origin";
 userDestination = "user_destination";
@@ -95,10 +95,10 @@ how to encrypt data in helper section.
 npx hardhat --network lachain erc20-approve --erc20-address 0x3b9d9e6c956f2885a272ca1da2aa63bf59bdf939 --spender 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC --amount 100
 ```
 
-### send transfer Request (sender: entity 1)
+### batch transfer Request (sender: entity 1)
 
 ```
-npx hardhat --network lachain transfer-request --contract-address 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC --origin-domain entity1.cvu --destination-domain entity2.cvu --amount 1 --encrypted-origin 0x547195888b88195bb660b00241048c7503dffe07cef74791200afff11d2974e7804fea944fc0aaa510162e6f70690de25a60dd14e069cb060628497e22f1472f8fe1a192e5c58b14bbce13552e1f1deb833c8b81396c34e8cc47871d4f6cc96561 --encrypted-destination 0x09cbe19009a59716f03c32a052a9d69c034c12060c846ef364c597bf10f1ccb2a2a4af392762dc943a809dbced34ab3c3a4dbc2c5adcdf57126ccea6b09d00ee134fae48aaf0f7793a7a09490a2a5fdfe12094f76fac3c2bbac80d77aaa2c1d9dcb1acf8aecbfab623676b5f3c62f7362b --expiration 100000 --external-ref ""
+npx hardhat --network lachain batch-transfer-request --contract-address 0x6aD18D9D66933eF51D3bE117c425Ce355251f213 --origin-domains entity1.cvu,entity1.cvu --destination-domains entity2.cvu,entity2.cvu --amounts 1,2 --encrypted-origins 0x547195888b88195bb660b00241048c7503dffe07cef74791200afff11d2974e7804fea944fc0aaa510162e6f70690de25a60dd14e069cb060628497e22f1472f8fe1a192e5c58b14bbce13552e1f1deb833c8b81396c34e8cc47871d4f6cc96561,0x547195888b88195bb660b00241048c7503dffe07cef74791200afff11d2974e7804fea944fc0aaa510162e6f70690de25a60dd14e069cb060628497e22f1472f8fe1a192e5c58b14bbce13552e1f1deb833c8b81396c34e8cc47871d4f6cc96561 --encrypted-destinations 0x09cbe19009a59716f03c32a052a9d69c034c12060c846ef364c597bf10f1ccb2a2a4af392762dc943a809dbced34ab3c3a4dbc2c5adcdf57126ccea6b09d00ee134fae48aaf0f7793a7a09490a2a5fdfe12094f76fac3c2bbac80d77aaa2c1d9dcb1acf8aecbfab623676b5f3c62f7362b,0x09cbe19009a59716f03c32a052a9d69c034c12060c846ef364c597bf10f1ccb2a2a4af392762dc943a809dbced34ab3c3a4dbc2c5adcdf57126ccea6b09d00ee134fae48aaf0f7793a7a09490a2a5fdfe12094f76fac3c2bbac80d77aaa2c1d9dcb1acf8aecbfab623676b5f3c62f7362b --expirations 100000,100000 --external-refs "",""
 ```
 
 transferHash: 0x449de24bbe3236353b131865d29db1861f4d16b79893ce6007eafee0e0196dfa
@@ -106,7 +106,7 @@ transferHash: 0x449de24bbe3236353b131865d29db1861f4d16b79893ce6007eafee0e0196dfa
 ## Step 3 - Batch accept Transfers (sender: entity 2)
 
 ```
-npx hardhat --network lachain batch-accept-transfers --contract-address 0x1a5FD953DfD5443F7A4452F4A639B0967C9b79cC 0xe326055a838a06485aafcf790cd621f16aa524aa5602a15d3bc82d918782047a
+npx hardhat --network lachain batch-accept-transfers --contract-address 0x6aD18D9D66933eF51D3bE117c425Ce355251f213 0xe326055a838a06485aafcf790cd621f16aa524aa5602a15d3bc82d918782047a
 ```
 
 ## Helpers

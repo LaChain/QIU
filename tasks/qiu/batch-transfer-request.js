@@ -1,5 +1,5 @@
 const { task } = require("hardhat/config");
-const { getTransferHash } = require("../../utils/helpers");
+const { getTransferHash, toWei } = require("../../utils/helpers");
 
 task("batch-transfer-request", "Create a batch of transfer requests")
   .addParam("contractAddress", "qiu contract address")
@@ -17,6 +17,7 @@ task("batch-transfer-request", "Create a batch of transfer requests")
     const originDomains = taskArgs.originDomains.split(",");
     const destinationDomains = taskArgs.destinationDomains.split(",");
     const amounts = taskArgs.amounts.split(",");
+    const amountsInWei = amounts.map((amount) => toWei(amount));
     const encryptedOrigins = taskArgs.encryptedOrigins.split(",");
     const encryptedDestinations = taskArgs.encryptedDestinations.split(",");
     const expirations = taskArgs.expirations.split(",");
@@ -41,7 +42,7 @@ task("batch-transfer-request", "Create a batch of transfer requests")
     for (let i = 0; i < originDomains.length; i++) {
       const originDomain = originDomains[i];
       const destinationDomain = destinationDomains[i];
-      const tokenAmount = amounts[i];
+      const tokenAmount = amountsInWei[i];
       const encryptedOrigin = encryptedOrigins[i];
       const encryptedDestination = encryptedDestinations[i];
       const expirationTime = expirations[i];
@@ -70,7 +71,7 @@ task("batch-transfer-request", "Create a batch of transfer requests")
       .batchTransferRequest(
         originDomains,
         destinationDomains,
-        amounts,
+        amountsInWei,
         encryptedOrigins,
         encryptedDestinations,
         expirations,
