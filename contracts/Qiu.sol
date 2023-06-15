@@ -220,7 +220,7 @@ contract Qiu is Ownable, Pausable {
             transfer.status = Status.Pending;
             transfer.externalRef = _externalRef;
 
-            originInfo.nonce += 1;
+            unchecked { originInfo.nonce += 1; }
         }
         // Transfer the tokens from origin to the contract using SafeERC20
         SafeERC20.safeTransferFrom(
