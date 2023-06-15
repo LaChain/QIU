@@ -79,8 +79,8 @@ contract Qiu is Ownable, Pausable {
     function registerEntity(
         string calldata _domain,
         address _entityAddress,
-    ) public onlyOwner whenNotPaused {
         bytes calldata _publicKey
+    ) external onlyOwner whenNotPaused {
         require(bytes(_domain).length > 0, "domain can not be empty");
         bytes32 domainHash = keccak256(bytes(_domain));
         EntityInfo storage entity = domainHashToEntity[domainHash];
