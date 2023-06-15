@@ -117,19 +117,20 @@ contract Qiu is Ownable, Pausable {
         uint256[] memory _expirations,
         string[] memory _externalRefs
     ) external whenNotPaused returns (bytes32[] memory) {
+        uint256 _originDomainsLength = _originDomains.length;
         require(
-            _originDomains.length == _destinationDomains.length &&
-                _originDomains.length == _amounts.length &&
-                _originDomains.length == _encryptedOrigins.length &&
-                _originDomains.length == _encryptedDestinations.length &&
-                _originDomains.length == _expirations.length &&
-                _originDomains.length == _externalRefs.length,
+            _originDomainsLength == _destinationDomains.length &&
+                _originDomainsLength == _amounts.length &&
+                _originDomainsLength == _encryptedOrigins.length &&
+                _originDomainsLength == _encryptedDestinations.length &&
+                _originDomainsLength == _expirations.length &&
+                _originDomainsLength == _externalRefs.length,
             "All arrays must have the same length"
         );
 
-        bytes32[] memory transferHashes = new bytes32[](_originDomains.length);
+        bytes32[] memory transferHashes = new bytes32[](_originDomainsLength);
 
-        for (uint256 i = 0; i < _originDomains.length; i++) {
+        for(uint256 i; i < _originDomainsLength;) {
             bytes32 transferHash = transferRequest(
                 _originDomains[i],
                 _destinationDomains[i],
@@ -141,6 +142,8 @@ contract Qiu is Ownable, Pausable {
             );
 
             transferHashes[i] = transferHash;
+
+            unchecked { ++i; }
         }
         return transferHashes;
     }
@@ -249,8 +252,10 @@ contract Qiu is Ownable, Pausable {
     function batchAcceptTransfer(
         bytes32[] calldata _transferHashes
     ) external whenNotPaused {
-        for (uint256 i = 0; i < _transferHashes.length; i++) {
+        for(uint256 i; i < _transferHashes.length;) {
             acceptTransfer(_transferHashes[i]);
+
+            unchecked { ++i; }
         }
     }
 
@@ -258,8 +263,9 @@ contract Qiu is Ownable, Pausable {
     function batchCancelTransfer(
         bytes32[] calldata _transferHashes
     ) external whenNotPaused {
-        for (uint256 i = 0; i < _transferHashes.length; i++) {
+        for(uint256 i; i < _transferHashes.length;) {
             cancelTransfer(_transferHashes[i]);
+            unchecked { ++i; }
         }
     }
 
@@ -343,10 +349,12 @@ contract Qiu is Ownable, Pausable {
     }
 
     function getAllEntities() public view returns (EntityInfo[] memory) {
-        EntityInfo[] memory allEntities = new EntityInfo[](entities.length);
+        uint256 entitiesLength = entities.length;
+        EntityInfo[] memory allEntities = new EntityInfo[](entitiesLength);
 
-        for (uint256 i = 0; i < entities.length; i++) {
+        for(uint256 i; i < entitiesLength;) {
             allEntities[i] = domainHashToEntity[entities[i]];
+            unchecked { ++i; }
         }
         return allEntities;
     }
