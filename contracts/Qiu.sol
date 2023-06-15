@@ -77,10 +77,10 @@ contract Qiu is Ownable, Pausable {
 
     // Register a new entity (only owner)
     function registerEntity(
-        string memory _domain,
+        string calldata _domain,
         address _entityAddress,
-        bytes memory _publicKey
     ) public onlyOwner whenNotPaused {
+        bytes calldata _publicKey
         require(bytes(_domain).length > 0, "domain can not be empty");
         bytes32 domainHash = keccak256(bytes(_domain));
         EntityInfo storage entity = domainHashToEntity[domainHash];
@@ -99,7 +99,7 @@ contract Qiu is Ownable, Pausable {
 
     // Disable an existing entity (only owner)
     function disableEntity(
-        string memory _domain
+        string calldata _domain
     ) external onlyOwner whenNotPaused {
         bytes32 domainHash = getDomainHash(_domain);
         EntityInfo storage entity = domainHashToEntity[domainHash];
@@ -109,9 +109,9 @@ contract Qiu is Ownable, Pausable {
 
     // Create multiple transfer requests at once (sender)
     function batchTransferRequest(
-        string[] memory _originDomains,
-        string[] memory _destinationDomains,
-        uint256[] memory _amounts,
+        string[] calldata _originDomains,
+        string[] calldata _destinationDomains,
+        uint256[] calldata _amounts,
         bytes[] memory _encryptedOrigins,
         bytes[] memory _encryptedDestinations,
         uint256[] memory _expirations,
@@ -148,8 +148,8 @@ contract Qiu is Ownable, Pausable {
     // Create a new transfer request (sender)
     // _encrtyptedOrigin and _encrtyptedDestination are encryped with destination public key
     function transferRequest(
-        string memory _originDomain,
-        string memory _destinationDomain,
+        string calldata _originDomain,
+        string calldata _destinationDomain,
         uint256 _amount,
         bytes memory _encryptedOrigin,
         bytes memory _encryptedDestination,
@@ -365,7 +365,7 @@ contract Qiu is Ownable, Pausable {
 
     // function to get domainHash from domain
     function getDomainHash(
-        string memory _domain
+        string calldata _domain
     ) public pure returns (bytes32) {
         return keccak256(bytes(_domain));
     }
