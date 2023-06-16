@@ -11,10 +11,10 @@ contract Qiu is Ownable, Pausable {
     struct EntityInfo {
         bytes32 domainHash;
         address entityAddress;
+        bool disable;
         uint256 nonce;
         string domain;
         bytes publicKey;
-        bool disable;
     }
 
     enum Status {
