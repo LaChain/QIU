@@ -19,8 +19,8 @@ async function main() {
   console.log("Deploying ERC20...");
   const MockERC20 = await hre.ethers.getContractFactory("MockERC20");
   const tERC20 = await MockERC20.deploy(
-    "Num Ars",
-    "NARS",
+    "Test Num Ars",
+    "TNARS",
     owner.address,
     initialBalance
   );
