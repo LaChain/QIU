@@ -1,4 +1,5 @@
 const asyncHandler = require("express-async-handler");
+const { InternalServerError } = require("../errors/commonErrors");
 
 module.exports = {
   nativeBalance: asyncHandler(async (req, res, next) => {
