@@ -4,6 +4,7 @@ task("transfer-info", "Get transfer info")
   .addParam("contractAddress", "qiu contract address")
   .addParam("transferHash", "hash of the transfer request")
   .setAction(async (taskArgs, hre) => {
+    await hre.setup();
     const qiu = (await hre.ethers.getContractFactory("Qiu")).attach(
       taskArgs.contractAddress
     );

@@ -4,6 +4,7 @@ task("native-transfer", "Send native currency to an address")
   .addParam("to", "The address of the receiver account")
   .addParam("amount", "The amount of native currency to send")
   .setAction(async (taskArgs, hre) => {
+    await hre.setup();
     let [sender] = await hre.ethers.getSigners();
     const to = taskArgs.to;
     // const amount = hre.ethers.utils.parseEther(taskArgs.amount);

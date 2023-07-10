@@ -4,6 +4,7 @@ task("entity-info", "Get entity info")
   .addParam("contractAddress", "qiu contract address")
   .addParam("domain", "domain")
   .setAction(async (taskArgs, hre) => {
+    await hre.setup();
     const qiu = (await hre.ethers.getContractFactory("Qiu")).attach(
       taskArgs.contractAddress
     );
