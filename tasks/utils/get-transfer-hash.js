@@ -9,6 +9,7 @@ task("get-transfer-hash", "Get transfer hash")
   .addParam("encryptedDestination", "encripted destination")
   .addParam("expiration", "expiration time of the transfer request")
   .setAction(async (taskArgs, hre) => {
+    await hre.setup();
     const qiu = (await hre.ethers.getContractFactory("Qiu")).attach(
       taskArgs.contractAddress
     );
